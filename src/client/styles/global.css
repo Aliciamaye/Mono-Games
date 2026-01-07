@@ -91,7 +91,11 @@ a {
 a:hover {
   color: var(--secondary);
   text-decoration: underline wavy var(--accent);
-}Comic Sans MS', cursive;
+}
+
+/* Buttons */
+button {
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
   cursor: pointer;
   border: none;
   outline: none;
@@ -109,7 +113,9 @@ input, textarea, select {
   font-family: 'Segoe UI', sans-serif;
   font-size: 1rem;
   color: var(--text-primary);
-  transition: all 0.3s ease
+  transition: all 0.3s ease;
+}
+
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--primary);
