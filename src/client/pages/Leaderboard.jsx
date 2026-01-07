@@ -1,20 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { TrophyIcon, CrownIcon, StarIcon, SearchIcon, GamepadIcon } from '../components/Icons';
 import '../styles/cartoony-theme.css';
 import '../styles/decorations.css';
 
 function Leaderboard() {
   const [selectedGame, setSelectedGame] = useState('all');
   const [selectedPeriod, setSelectedPeriod] = useState('all-time');
-  const [isLoading, setIsLoading] = useState(false);
 
   const games = [
     { id: 'all', name: 'All Games' },
-    { id: 'snake', name: '🐍 Snake' },
-    { id: 'pong', name: '🏓 Pong' },
-    { id: 'tetris', name: '🧱 Tetris' },
-    { id: '2048', name: '🔢 2048' },
-    { id: 'memory-match', name: '🃏 Memory Match' },
-    { id: 'racing', name: '🏎️ Turbo Racer' }
+    { id: 'snake', name: 'Snake' },
+    { id: 'pong', name: 'Pong' },
+    { id: 'tetris', name: 'Tetris' },
+    { id: '2048', name: '2048' },
+    { id: 'tic-tac-toe', name: 'Tic Tac Toe' },
+    { id: 'connect-four', name: 'Connect Four' }
   ];
 
   const periods = [
@@ -24,41 +24,52 @@ function Leaderboard() {
     { id: 'all-time', label: 'All Time' }
   ];
 
-  // Mock leaderboard data
-  const [leaderboardData] = useState([
-    { rank: 1, username: 'ProGamer2026', avatar: '👑', score: 999999, games: 450, country: '🇺🇸' },
-    { rank: 2, username: 'SnakeMaster', avatar: '🐍', score: 875420, games: 380, country: '🇬🇧' },
-    { rank: 3, username: 'TetrisKing', avatar: '🧱', score: 750890, games: 420, country: '🇯🇵' },
-    { rank: 4, username: 'ArcadeChamp', avatar: '🎮', score: 680500, games: 310, country: '🇰🇷' },
-    { rank: 5, username: 'GameWizard', avatar: '🧙', score: 620150, games: 290, country: '🇧🇷' },
-    { rank: 6, username: 'SpeedRunner', avatar: '⚡', score: 580200, games: 540, country: '🇩🇪' },
-    { rank: 7, username: 'RetroFan', avatar: '👾', score: 520100, games: 260, country: '🇫🇷' },
-    { rank: 8, username: 'PixelPro', avatar: '🎯', score: 490500, games: 230, country: '🇨🇦' },
-    { rank: 9, username: 'CasualKing', avatar: '☕', score: 450800, games: 450, country: '🇦🇺' },
-    { rank: 10, username: 'NightOwl', avatar: '🦉', score: 410200, games: 280, country: '🇮🇳' },
-    { rank: 11, username: 'DayDreamer', avatar: '🌙', score: 380900, games: 200, country: '🇲🇽' },
-    { rank: 12, username: 'QuickFingers', avatar: '✌️', score: 350400, games: 320, country: '🇮🇹' },
-    { rank: 13, username: 'CoolCat', avatar: '🐱', score: 320100, games: 180, country: '🇪🇸' },
-    { rank: 14, username: 'HappyGamer', avatar: '😊', score: 290500, games: 250, country: '🇳🇱' },
-    { rank: 15, username: 'ChillVibes', avatar: '🎧', score: 260200, games: 160, country: '🇸🇪' }
-  ]);
+  // Empty leaderboard - no fake data
+  const leaderboardData = [];
 
-  // Current user's rank (mock)
-  const currentUserRank = {
-    rank: 127,
-    username: 'You',
-    avatar: '🎮',
-    score: 45000,
-    games: 45,
-    isCurrentUser: true
-  };
+  // Current user's rank (will be populated when user plays games)
+  const currentUserRank = null;
 
-  const getRankStyle = (rank) => {
-    if (rank === 1) return { bg: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)', icon: '🥇' };
-    if (rank === 2) return { bg: 'linear-gradient(135deg, #C0C0C0 0%, #A0A0A0 100%)', icon: '🥈' };
-    if (rank === 3) return { bg: 'linear-gradient(135deg, #CD7F32 0%, #8B4513 100%)', icon: '🥉' };
-    return { bg: 'var(--bg-pattern)', icon: null };
-  };
+  const EmptyState = () => (
+    <div className="cartoony-card" style={{
+      padding: '4rem 2rem',
+      textAlign: 'center',
+      marginTop: '2rem'
+    }}>
+      <div style={{
+        width: '120px',
+        height: '120px',
+        margin: '0 auto 1.5rem',
+        borderRadius: 'var(--radius-circle)',
+        background: 'var(--bg-pattern)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        border: '4px solid var(--border-color)'
+      }}>
+        <TrophyIcon size={60} color="var(--text-secondary)" />
+      </div>
+
+      <h3 className="cartoony-subtitle" style={{ marginBottom: '1rem' }}>
+        No Scores Yet!
+      </h3>
+
+      <p style={{
+        color: 'var(--text-secondary)',
+        maxWidth: '400px',
+        margin: '0 auto 2rem',
+        lineHeight: 1.6
+      }}>
+        Be the first to claim a spot on the leaderboard! Play games and your scores will appear here.
+      </p>
+
+      <a href="/launcher">
+        <button className="cartoony-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+          <GamepadIcon size={20} color="white" /> Start Playing
+        </button>
+      </a>
+    </div>
+  );
 
   return (
     <div style={{
@@ -69,9 +80,13 @@ function Leaderboard() {
       <div className="container" style={{ maxWidth: '1000px', margin: '0 auto' }}>
         <h1 className="cartoony-title" style={{
           textAlign: 'center',
-          marginBottom: '2rem'
+          marginBottom: '2rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.75rem'
         }}>
-          🏆 Leaderboards
+          <TrophyIcon size={40} color="var(--secondary)" /> Leaderboards
         </h1>
 
         {/* Filters */}
@@ -90,11 +105,13 @@ function Leaderboard() {
               <label style={{
                 fontFamily: "'Comic Sans MS', cursive",
                 fontWeight: 700,
-                display: 'block',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
                 marginBottom: '0.5rem',
                 color: 'var(--text-primary)'
               }}>
-                🎮 Game
+                <GamepadIcon size={18} /> Game
               </label>
               <select
                 value={selectedGame}
@@ -117,7 +134,7 @@ function Leaderboard() {
                 marginBottom: '0.5rem',
                 color: 'var(--text-primary)'
               }}>
-                📅 Time Period
+                Time Period
               </label>
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 {periods.map(period => (
@@ -151,290 +168,92 @@ function Leaderboard() {
           </div>
         </div>
 
-        {/* Top 3 Podium */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'flex-end',
-          gap: '1rem',
-          marginBottom: '2rem',
-          flexWrap: 'wrap'
-        }}>
-          {/* 2nd Place */}
-          <div className="cartoony-card bounce-gentle" style={{
-            width: '150px',
-            textAlign: 'center',
-            padding: '1.5rem 1rem',
-            background: getRankStyle(2).bg,
-            animationDelay: '0.1s'
-          }}>
-            <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🥈</div>
-            <div style={{
-              width: '60px',
-              height: '60px',
-              borderRadius: 'var(--radius-circle)',
-              background: 'var(--bg-card)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '2rem',
-              margin: '0 auto 0.75rem',
-              border: '3px solid var(--text-primary)'
-            }}>
-              {leaderboardData[1].avatar}
-            </div>
-            <div style={{
-              fontFamily: "'Comic Sans MS', cursive",
-              fontWeight: 700,
-              fontSize: '0.875rem',
-              color: 'var(--text-primary)',
-              marginBottom: '0.25rem'
-            }}>
-              {leaderboardData[1].username}
-            </div>
-            <div style={{
-              fontWeight: 900,
-              fontSize: '1.25rem',
-              color: 'var(--text-primary)'
-            }}>
-              {leaderboardData[1].score.toLocaleString()}
-            </div>
-          </div>
+        {/* Empty State or Leaderboard */}
+        {leaderboardData.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <>
+            {/* Top 3 Podium would go here */}
+            {/* Full Rankings would go here */}
+          </>
+        )}
 
-          {/* 1st Place */}
-          <div className="cartoony-card bounce-gentle" style={{
-            width: '180px',
-            textAlign: 'center',
-            padding: '2rem 1rem',
-            background: getRankStyle(1).bg,
-            transform: 'scale(1.1)',
-            zIndex: 10
-          }}>
-            <div style={{ fontSize: '4rem', marginBottom: '0.5rem' }}>🥇</div>
-            <div style={{
-              width: '80px',
-              height: '80px',
-              borderRadius: 'var(--radius-circle)',
-              background: 'var(--bg-card)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '2.5rem',
-              margin: '0 auto 0.75rem',
-              border: '4px solid var(--text-primary)',
-              boxShadow: '0 4px 0 var(--text-primary)'
-            }}>
-              {leaderboardData[0].avatar}
-            </div>
-            <div style={{
-              fontFamily: "'Comic Sans MS', cursive",
-              fontWeight: 700,
-              fontSize: '1rem',
-              color: 'var(--text-primary)',
-              marginBottom: '0.25rem'
-            }}>
-              {leaderboardData[0].username}
-            </div>
-            <div style={{
-              fontWeight: 900,
-              fontSize: '1.5rem',
-              color: 'var(--text-primary)'
-            }}>
-              {leaderboardData[0].score.toLocaleString()}
-            </div>
-          </div>
-
-          {/* 3rd Place */}
-          <div className="cartoony-card bounce-gentle" style={{
-            width: '150px',
-            textAlign: 'center',
-            padding: '1.5rem 1rem',
-            background: getRankStyle(3).bg,
-            animationDelay: '0.2s'
-          }}>
-            <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🥉</div>
-            <div style={{
-              width: '60px',
-              height: '60px',
-              borderRadius: 'var(--radius-circle)',
-              background: 'var(--bg-card)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '2rem',
-              margin: '0 auto 0.75rem',
-              border: '3px solid var(--text-primary)'
-            }}>
-              {leaderboardData[2].avatar}
-            </div>
-            <div style={{
-              fontFamily: "'Comic Sans MS', cursive",
-              fontWeight: 700,
-              fontSize: '0.875rem',
-              color: 'var(--text-primary)',
-              marginBottom: '0.25rem'
-            }}>
-              {leaderboardData[2].username}
-            </div>
-            <div style={{
-              fontWeight: 900,
-              fontSize: '1.25rem',
-              color: 'var(--text-primary)'
-            }}>
-              {leaderboardData[2].score.toLocaleString()}
-            </div>
-          </div>
-        </div>
-
-        {/* Your Rank Card */}
-        <div className="cartoony-card rainbow-border" style={{
-          padding: '1rem 1.5rem',
-          marginBottom: '2rem',
+        {/* Your Stats Card */}
+        <div className="cartoony-card" style={{
+          padding: '1.5rem',
+          marginTop: '2rem',
           display: 'flex',
           alignItems: 'center',
-          gap: '1rem'
+          gap: '1.5rem',
+          flexWrap: 'wrap'
         }}>
           <div style={{
-            width: '50px',
-            height: '50px',
-            borderRadius: 'var(--radius-circle)',
-            background: 'var(--primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 900,
-            fontSize: '1.25rem',
-            color: 'white',
-            fontFamily: "'Comic Sans MS', cursive"
-          }}>
-            #{currentUserRank.rank}
-          </div>
-          <div style={{
-            width: '48px',
-            height: '48px',
+            width: '60px',
+            height: '60px',
             borderRadius: 'var(--radius-circle)',
             background: 'var(--bg-pattern)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '1.5rem',
             border: '3px solid var(--border-color)'
           }}>
-            {currentUserRank.avatar}
+            <StarIcon size={30} color="var(--text-secondary)" />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{
               fontFamily: "'Comic Sans MS', cursive",
               fontWeight: 700,
-              color: 'var(--primary)'
+              fontSize: '1.25rem',
+              color: 'var(--text-primary)'
             }}>
-              {currentUserRank.username} (Your Rank)
+              Your Stats
             </div>
-            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-              {currentUserRank.games} games played
+            <div style={{
+              fontSize: '0.875rem',
+              color: 'var(--text-secondary)',
+              marginTop: '0.25rem'
+            }}>
+              Play games to track your progress and compete!
             </div>
           </div>
           <div style={{
-            fontWeight: 900,
-            fontSize: '1.5rem',
-            color: 'var(--text-primary)'
+            display: 'flex',
+            gap: '2rem',
+            flexWrap: 'wrap'
           }}>
-            {currentUserRank.score.toLocaleString()}
-          </div>
-        </div>
-
-        {/* Full Rankings Table */}
-        <div className="cartoony-card" style={{ padding: '1.5rem', overflow: 'hidden' }}>
-          <h3 className="cartoony-subtitle" style={{ marginBottom: '1.5rem' }}>
-            📋 Full Rankings
-          </h3>
-
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 8px' }}>
-              <thead>
-                <tr>
-                  <th style={{
-                    textAlign: 'left',
-                    padding: '0.75rem',
-                    fontFamily: "'Comic Sans MS', cursive",
-                    color: 'var(--text-secondary)',
-                    fontWeight: 700
-                  }}>Rank</th>
-                  <th style={{
-                    textAlign: 'left',
-                    padding: '0.75rem',
-                    fontFamily: "'Comic Sans MS', cursive",
-                    color: 'var(--text-secondary)',
-                    fontWeight: 700
-                  }}>Player</th>
-                  <th style={{
-                    textAlign: 'center',
-                    padding: '0.75rem',
-                    fontFamily: "'Comic Sans MS', cursive",
-                    color: 'var(--text-secondary)',
-                    fontWeight: 700
-                  }}>Games</th>
-                  <th style={{
-                    textAlign: 'right',
-                    padding: '0.75rem',
-                    fontFamily: "'Comic Sans MS', cursive",
-                    color: 'var(--text-secondary)',
-                    fontWeight: 700
-                  }}>Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leaderboardData.slice(3).map(player => (
-                  <tr
-                    key={player.rank}
-                    style={{
-                      background: 'var(--bg-pattern)',
-                      borderRadius: 'var(--radius-md)'
-                    }}
-                  >
-                    <td style={{
-                      padding: '1rem',
-                      borderRadius: 'var(--radius-md) 0 0 var(--radius-md)',
-                      fontWeight: 700,
-                      fontFamily: "'Comic Sans MS', cursive",
-                      color: 'var(--text-primary)'
-                    }}>
-                      #{player.rank}
-                    </td>
-                    <td style={{ padding: '1rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <span style={{ fontSize: '1.5rem' }}>{player.avatar}</span>
-                        <span style={{
-                          fontFamily: "'Comic Sans MS', cursive",
-                          fontWeight: 700,
-                          color: 'var(--text-primary)'
-                        }}>
-                          {player.username}
-                        </span>
-                        <span>{player.country}</span>
-                      </div>
-                    </td>
-                    <td style={{
-                      padding: '1rem',
-                      textAlign: 'center',
-                      color: 'var(--text-secondary)'
-                    }}>
-                      {player.games}
-                    </td>
-                    <td style={{
-                      padding: '1rem',
-                      borderRadius: '0 var(--radius-md) var(--radius-md) 0',
-                      textAlign: 'right',
-                      fontWeight: 900,
-                      fontFamily: "'Comic Sans MS', cursive",
-                      color: 'var(--primary)'
-                    }}>
-                      {player.score.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                fontWeight: 900,
+                fontSize: '1.5rem',
+                color: 'var(--primary)',
+                fontFamily: "'Comic Sans MS', cursive"
+              }}>
+                0
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Games</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                fontWeight: 900,
+                fontSize: '1.5rem',
+                color: 'var(--primary)',
+                fontFamily: "'Comic Sans MS', cursive"
+              }}>
+                0
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Score</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                fontWeight: 900,
+                fontSize: '1.5rem',
+                color: 'var(--text-secondary)',
+                fontFamily: "'Comic Sans MS', cursive"
+              }}>
+                —
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Rank</div>
+            </div>
           </div>
         </div>
       </div>

@@ -1,5 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import useAuthStore from '../store/authStore';
+import {
+  UserIcon, TrophyIcon, StarIcon, GamepadIcon,
+  ChartIcon, CrownIcon, SaveIcon, CheckIcon
+} from '../components/Icons';
 import '../styles/cartoony-theme.css';
 import '../styles/decorations.css';
 
@@ -8,47 +12,54 @@ function Profile() {
   const [activeTab, setActiveTab] = useState('stats');
   const [isEditing, setIsEditing] = useState(false);
 
-  // Mock user data (in real app, fetch from backend)
+  // Real user data - starts at 0
   const [userData, setUserData] = useState({
-    username: user?.username || 'Player',
-    email: user?.email || 'player@monogames.com',
-    avatar: '🎮',
-    level: 15,
-    xp: 2450,
-    xpToNext: 3000,
-    joinDate: '2026-01-01',
+    username: user?.username || 'Guest',
+    email: user?.email || '',
+    avatar: 'avatar1',
+    level: 1,
+    xp: 0,
+    xpToNext: 100,
+    joinDate: new Date().toLocaleDateString(),
     stats: {
-      gamesPlayed: 156,
-      totalScore: 125890,
-      timePlayed: '24h 35m',
-      achievements: 12,
-      highScores: 8,
-      winRate: 67
+      gamesPlayed: 0,
+      totalScore: 0,
+      timePlayed: '0h 0m',
+      achievements: 0,
+      highScores: 0,
+      winRate: 0
     },
-    recentGames: [
-      { id: 'snake', name: 'Snake', score: 1250, date: '2026-01-07' },
-      { id: 'pong', name: 'Pong', score: 850, date: '2026-01-06' },
-      { id: 'tetris', name: 'Tetris', score: 15200, date: '2026-01-06' },
-      { id: '2048', name: '2048', score: 8192, date: '2026-01-05' }
-    ],
+    recentGames: [],
     achievements: [
-      { id: 1, name: 'First Victory', desc: 'Win your first game', icon: '🏆', unlocked: true },
-      { id: 2, name: 'Speed Demon', desc: 'Complete a game in under 1 minute', icon: '⚡', unlocked: true },
-      { id: 3, name: 'High Scorer', desc: 'Score over 10,000 points', icon: '🌟', unlocked: true },
-      { id: 4, name: 'Collector', desc: 'Play all core games', icon: '📚', unlocked: false },
-      { id: 5, name: 'Master', desc: 'Reach level 50', icon: '👑', unlocked: false },
-      { id: 6, name: 'Perfectionist', desc: 'Get a perfect score', icon: '💎', unlocked: false }
+      { id: 1, name: 'First Steps', desc: 'Play your first game', icon: GamepadIcon, unlocked: false },
+      { id: 2, name: 'Getting Started', desc: 'Score 100 points', icon: StarIcon, unlocked: false },
+      { id: 3, name: 'Challenger', desc: 'Win against AI on Normal', icon: TrophyIcon, unlocked: false },
+      { id: 4, name: 'Pro Gamer', desc: 'Win against AI on Hard', icon: CrownIcon, unlocked: false },
+      { id: 5, name: 'Collector', desc: 'Play 5 different games', icon: GamepadIcon, unlocked: false },
+      { id: 6, name: 'Champion', desc: 'Reach Level 10', icon: CrownIcon, unlocked: false }
     ]
   });
 
-  const avatarOptions = ['🎮', '👾', '🕹️', '🎯', '🏆', '⭐', '🚀', '🎪', '🎨', '🦊', '🐱', '🐶'];
+  const avatarOptions = [
+    { id: 'avatar1', color: '#FF6B35' },
+    { id: 'avatar2', color: '#4ECDC4' },
+    { id: 'avatar3', color: '#95E1D3' },
+    { id: 'avatar4', color: '#F7931E' },
+    { id: 'avatar5', color: '#E63946' },
+    { id: 'avatar6', color: '#7B2CBF' }
+  ];
 
-  const xpPercentage = (userData.xp / userData.xpToNext) * 100;
+  const xpPercentage = userData.xpToNext > 0 ? (userData.xp / userData.xpToNext) * 100 : 0;
+
+  const getAvatarColor = () => {
+    const avatar = avatarOptions.find(a => a.id === userData.avatar);
+    return avatar?.color || '#FF6B35';
+  };
 
   const renderStats = () => (
     <div>
-      <h3 className="cartoony-subtitle" style={{ marginBottom: '1.5rem' }}>
-        📊 Your Statistics
+      <h3 className="cartoony-subtitle" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <ChartIcon size={24} color="var(--primary)" /> Your Statistics
       </h3>
 
       <div style={{
@@ -58,19 +69,30 @@ function Profile() {
         marginBottom: '2rem'
       }}>
         {[
-          { label: 'Games Played', value: userData.stats.gamesPlayed, icon: '🎮' },
-          { label: 'Total Score', value: userData.stats.totalScore.toLocaleString(), icon: '🏅' },
-          { label: 'Time Played', value: userData.stats.timePlayed, icon: '⏱️' },
-          { label: 'Achievements', value: `${userData.stats.achievements}/20`, icon: '🏆' },
-          { label: 'High Scores', value: userData.stats.highScores, icon: '🌟' },
-          { label: 'Win Rate', value: `${userData.stats.winRate}%`, icon: '📈' }
+          { label: 'Games Played', value: userData.stats.gamesPlayed, Icon: GamepadIcon },
+          { label: 'Total Score', value: userData.stats.totalScore.toLocaleString(), Icon: StarIcon },
+          { label: 'Time Played', value: userData.stats.timePlayed, Icon: ChartIcon },
+          { label: 'Achievements', value: `${userData.stats.achievements}/${userData.achievements.length}`, Icon: TrophyIcon },
+          { label: 'High Scores', value: userData.stats.highScores, Icon: CrownIcon },
+          { label: 'Win Rate', value: `${userData.stats.winRate}%`, Icon: ChartIcon }
         ].map((stat, i) => (
           <div
             key={i}
             className="cartoony-card"
             style={{ padding: '1.25rem', textAlign: 'center' }}
           >
-            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{stat.icon}</div>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              margin: '0 auto 0.5rem',
+              borderRadius: 'var(--radius-circle)',
+              background: 'var(--bg-pattern)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <stat.Icon size={24} color="var(--primary)" />
+            </div>
             <div style={{
               fontFamily: "'Comic Sans MS', cursive",
               fontWeight: 900,
@@ -89,65 +111,94 @@ function Profile() {
         ))}
       </div>
 
-      <h4 style={{
-        fontFamily: "'Comic Sans MS', cursive",
-        fontWeight: 700,
-        marginBottom: '1rem',
-        color: 'var(--text-primary)'
-      }}>
-        🕹️ Recent Games
-      </h4>
+      {userData.recentGames.length === 0 ? (
+        <div style={{
+          padding: '2rem',
+          textAlign: 'center',
+          background: 'var(--bg-pattern)',
+          borderRadius: 'var(--radius-lg)',
+          border: '3px solid var(--border-color)'
+        }}>
+          <GamepadIcon size={48} color="var(--text-secondary)" />
+          <p style={{
+            marginTop: '1rem',
+            color: 'var(--text-secondary)',
+            fontFamily: "'Comic Sans MS', cursive"
+          }}>
+            No games played yet. Start playing to see your history!
+          </p>
+          <a href="/launcher" style={{ display: 'inline-block', marginTop: '1rem' }}>
+            <button className="cartoony-btn">
+              Play Now
+            </button>
+          </a>
+        </div>
+      ) : (
+        <>
+          <h4 style={{
+            fontFamily: "'Comic Sans MS', cursive",
+            fontWeight: 700,
+            marginBottom: '1rem',
+            color: 'var(--text-primary)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <GamepadIcon size={18} color="var(--primary)" /> Recent Games
+          </h4>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        {userData.recentGames.map((game, i) => (
-          <div
-            key={i}
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '1rem 1.25rem',
-              background: 'var(--bg-pattern)',
-              borderRadius: 'var(--radius-md)',
-              border: '3px solid var(--border-color)'
-            }}
-          >
-            <div>
-              <span style={{
-                fontFamily: "'Comic Sans MS', cursive",
-                fontWeight: 700,
-                color: 'var(--text-primary)'
-              }}>
-                {game.name}
-              </span>
-              <span style={{
-                marginLeft: '1rem',
-                fontSize: '0.875rem',
-                color: 'var(--text-secondary)'
-              }}>
-                {game.date}
-              </span>
-            </div>
-            <span style={{
-              background: 'var(--primary)',
-              color: 'white',
-              padding: '0.25rem 0.75rem',
-              borderRadius: 'var(--radius-pill)',
-              fontFamily: "'Comic Sans MS', cursive",
-              fontWeight: 700
-            }}>
-              {game.score.toLocaleString()}
-            </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {userData.recentGames.map((game, i) => (
+              <div
+                key={i}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '1rem 1.25rem',
+                  background: 'var(--bg-pattern)',
+                  borderRadius: 'var(--radius-md)',
+                  border: '3px solid var(--border-color)'
+                }}
+              >
+                <div>
+                  <span style={{
+                    fontFamily: "'Comic Sans MS', cursive",
+                    fontWeight: 700,
+                    color: 'var(--text-primary)'
+                  }}>
+                    {game.name}
+                  </span>
+                  <span style={{
+                    marginLeft: '1rem',
+                    fontSize: '0.875rem',
+                    color: 'var(--text-secondary)'
+                  }}>
+                    {game.date}
+                  </span>
+                </div>
+                <span style={{
+                  background: 'var(--primary)',
+                  color: 'white',
+                  padding: '0.25rem 0.75rem',
+                  borderRadius: 'var(--radius-pill)',
+                  fontFamily: "'Comic Sans MS', cursive",
+                  fontWeight: 700
+                }}>
+                  {game.score.toLocaleString()}
+                </span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
     </div>
   );
 
   const renderAchievements = () => (
     <div>
-      <h3 className="cartoony-subtitle" style={{ marginBottom: '1.5rem' }}>
-        🏆 Achievements
+      <h3 className="cartoony-subtitle" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <TrophyIcon size={24} color="var(--primary)" /> Achievements
       </h3>
 
       <div style={{
@@ -155,63 +206,65 @@ function Profile() {
         gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
         gap: '1rem'
       }}>
-        {userData.achievements.map(achievement => (
-          <div
-            key={achievement.id}
-            className="cartoony-card"
-            style={{
-              padding: '1.25rem',
-              opacity: achievement.unlocked ? 1 : 0.5,
-              filter: achievement.unlocked ? 'none' : 'grayscale(100%)'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: 'var(--radius-circle)',
-                background: achievement.unlocked
-                  ? 'linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%)'
-                  : 'var(--bg-pattern)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.5rem',
-                border: '3px solid var(--text-primary)',
-                boxShadow: achievement.unlocked ? '0 4px 0 var(--primary-dark)' : 'none'
-              }}>
-                {achievement.icon}
-              </div>
-              <div style={{ flex: 1 }}>
+        {userData.achievements.map(achievement => {
+          const IconComponent = achievement.icon;
+          return (
+            <div
+              key={achievement.id}
+              className="cartoony-card"
+              style={{
+                padding: '1.25rem',
+                opacity: achievement.unlocked ? 1 : 0.5,
+                filter: achievement.unlocked ? 'none' : 'grayscale(50%)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <div style={{
-                  fontFamily: "'Comic Sans MS', cursive",
-                  fontWeight: 700,
-                  color: 'var(--text-primary)',
-                  marginBottom: '0.25rem'
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: 'var(--radius-circle)',
+                  background: achievement.unlocked
+                    ? 'linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%)'
+                    : 'var(--bg-pattern)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '3px solid var(--border-color)',
+                  boxShadow: achievement.unlocked ? '0 4px 0 var(--primary-dark)' : 'none'
                 }}>
-                  {achievement.name}
+                  <IconComponent size={24} color={achievement.unlocked ? 'white' : 'var(--text-secondary)'} />
                 </div>
-                <div style={{
-                  fontSize: '0.875rem',
-                  color: 'var(--text-secondary)'
-                }}>
-                  {achievement.desc}
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    fontFamily: "'Comic Sans MS', cursive",
+                    fontWeight: 700,
+                    color: 'var(--text-primary)',
+                    marginBottom: '0.25rem'
+                  }}>
+                    {achievement.name}
+                  </div>
+                  <div style={{
+                    fontSize: '0.875rem',
+                    color: 'var(--text-secondary)'
+                  }}>
+                    {achievement.desc}
+                  </div>
                 </div>
+                {achievement.unlocked && (
+                  <CheckIcon size={24} color="var(--success)" />
+                )}
               </div>
-              {achievement.unlocked && (
-                <span style={{ color: 'var(--success)', fontSize: '1.5rem' }}>✓</span>
-              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 
   const renderEditProfile = () => (
     <div>
-      <h3 className="cartoony-subtitle" style={{ marginBottom: '1.5rem' }}>
-        ✏️ Edit Profile
+      <h3 className="cartoony-subtitle" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <UserIcon size={24} color="var(--primary)" /> Edit Profile
       </h3>
 
       <div style={{ marginBottom: '2rem' }}>
@@ -222,27 +275,29 @@ function Profile() {
           marginBottom: '0.75rem',
           color: 'var(--text-primary)'
         }}>
-          Choose Avatar
+          Choose Avatar Color
         </label>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-          {avatarOptions.map(emoji => (
+          {avatarOptions.map(avatar => (
             <button
-              key={emoji}
-              onClick={() => setUserData({ ...userData, avatar: emoji })}
+              key={avatar.id}
+              onClick={() => setUserData({ ...userData, avatar: avatar.id })}
               style={{
                 width: '56px',
                 height: '56px',
-                fontSize: '2rem',
                 borderRadius: 'var(--radius-circle)',
-                border: userData.avatar === emoji
-                  ? '4px solid var(--primary)'
+                border: userData.avatar === avatar.id
+                  ? '4px solid var(--text-primary)'
                   : '3px solid var(--border-color)',
-                background: userData.avatar === emoji ? 'var(--bg-pattern)' : 'var(--bg-card)',
+                background: avatar.color,
                 cursor: 'pointer',
-                transition: 'var(--transition-normal)'
+                transition: 'var(--transition-normal)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
             >
-              {emoji}
+              <UserIcon size={28} color="white" />
             </button>
           ))}
         </div>
@@ -283,6 +338,7 @@ function Profile() {
           onChange={(e) => setUserData({ ...userData, email: e.target.value })}
           className="cartoony-input"
           style={{ width: '100%' }}
+          placeholder="your@email.com"
         />
       </div>
 
@@ -290,8 +346,9 @@ function Profile() {
         <button
           className="cartoony-btn"
           onClick={() => setIsEditing(false)}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
         >
-          💾 Save Changes
+          <SaveIcon size={18} color="white" /> Save Changes
         </button>
         <button
           className="cartoony-btn cartoony-btn-secondary"
@@ -318,7 +375,19 @@ function Profile() {
           textAlign: 'center',
           maxWidth: '400px'
         }}>
-          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🔒</div>
+          <div style={{
+            width: '80px',
+            height: '80px',
+            margin: '0 auto 1.5rem',
+            borderRadius: 'var(--radius-circle)',
+            background: 'var(--bg-pattern)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: '4px solid var(--border-color)'
+          }}>
+            <UserIcon size={40} color="var(--text-secondary)" />
+          </div>
           <h2 className="cartoony-subtitle" style={{ marginBottom: '1rem' }}>
             Login Required
           </h2>
@@ -327,7 +396,7 @@ function Profile() {
           </p>
           <a href="/login">
             <button className="cartoony-btn">
-              🔑 Login Now
+              Login Now
             </button>
           </a>
         </div>
@@ -356,15 +425,14 @@ function Profile() {
             width: '100px',
             height: '100px',
             borderRadius: 'var(--radius-circle)',
-            background: 'linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%)',
+            background: getAvatarColor(),
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '3.5rem',
             border: '4px solid var(--text-primary)',
             boxShadow: '0 6px 0 var(--text-primary)'
           }}>
-            {userData.avatar}
+            <UserIcon size={50} color="white" />
           </div>
 
           {/* User Info */}
@@ -416,31 +484,36 @@ function Profile() {
           <button
             className="cartoony-btn cartoony-btn-secondary"
             onClick={() => setIsEditing(!isEditing)}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           >
-            ✏️ Edit Profile
+            <UserIcon size={18} /> Edit Profile
           </button>
         </div>
 
         {/* Tabs */}
-        <div style={{
-          display: 'flex',
-          gap: '0.75rem',
-          marginBottom: '2rem',
-          flexWrap: 'wrap'
-        }}>
-          {[
-            { id: 'stats', label: '📊 Stats', hidden: isEditing },
-            { id: 'achievements', label: '🏆 Achievements', hidden: isEditing }
-          ].filter(t => !t.hidden).map(tab => (
+        {!isEditing && (
+          <div style={{
+            display: 'flex',
+            gap: '0.75rem',
+            marginBottom: '2rem',
+            flexWrap: 'wrap'
+          }}>
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={activeTab === tab.id && !isEditing ? 'cartoony-btn' : 'cartoony-btn cartoony-btn-secondary'}
+              onClick={() => setActiveTab('stats')}
+              className={activeTab === 'stats' ? 'cartoony-btn' : 'cartoony-btn cartoony-btn-secondary'}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
             >
-              {tab.label}
+              <ChartIcon size={18} color={activeTab === 'stats' ? 'white' : 'var(--text-primary)'} /> Stats
             </button>
-          ))}
-        </div>
+            <button
+              onClick={() => setActiveTab('achievements')}
+              className={activeTab === 'achievements' ? 'cartoony-btn' : 'cartoony-btn cartoony-btn-secondary'}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+              <TrophyIcon size={18} color={activeTab === 'achievements' ? 'white' : 'var(--text-primary)'} /> Achievements
+            </button>
+          </div>
+        )}
 
         {/* Content */}
         <div className="cartoony-card" style={{ padding: '2rem' }}>
