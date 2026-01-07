@@ -1,21 +1,50 @@
-MIT License
+PROPRIETARY LICENSE
 
-Copyright (c) 2026 Mono Games
+Copyright (c) 2026 Mono Games Development Team. All Rights Reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+PRIVATE AND CONFIDENTIAL
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+This software and associated documentation files (the "Software") are the 
+proprietary and confidential property of the Mono Games Development Team.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+RESTRICTIONS:
+
+1. NO PUBLIC DISTRIBUTION
+   The Software may NOT be copied, modified, merged, published, distributed,
+   sublicensed, or sold to any third party without explicit written permission
+   from the copyright holders.
+
+2. AUTHORIZED USERS ONLY
+   Access to this repository and the Software is restricted to:
+   - Official developers of Mono Games
+   - Project owners and stakeholders
+   - Authorized contributors with written permission
+
+3. NO DERIVATIVE WORKS
+   Creating derivative works, forks, or modifications for distribution is
+   strictly prohibited without prior written authorization.
+
+4. CONFIDENTIALITY
+   All code, documentation, assets, and related materials are confidential.
+   Unauthorized disclosure is prohibited.
+
+5. NO WARRANTY
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+6. LIABILITY
+   IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+   OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+   USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+7. TERMINATION
+   Any unauthorized use, copying, or distribution will result in immediate
+   termination of access and may result in legal action.
+
+For licensing inquiries or permission requests, please contact:
+Mono Games Development Team
+https://github.com/Aliciamaye/Mono-Games
+
+Last Updated: January 7, 2026
