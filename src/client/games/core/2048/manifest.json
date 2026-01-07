@@ -1,0 +1,31 @@
+{
+  "id": "2048",
+  "name": "2048",
+  "version": "1.0.0",
+  "description": "Slide numbered tiles and combine them to reach 2048!",
+  "author": "Mono Games",
+  "category": "puzzle",
+  "tags": ["puzzle", "numbers", "strategy", "2048", "merge"],
+  "thumbnail": "/games/2048/thumb.png",
+  "controls": {
+    "keyboard": {
+      "ArrowKeys": "Move tiles",
+      "WASD": "Alternative movement"
+    },
+    "touch": {
+      "Swipe": "Move tiles in any direction"
+    }
+  },
+  "features": [
+    "Classic 2048 gameplay",
+    "Smooth tile merging",
+    "Colorful tile design",
+    "Score tracking",
+    "Game over detection"
+  ],
+  "highScoreEnabled": true,
+  "leaderboardEnabled": true,
+  "achievementsEnabled": true,
+  "size": "50KB",
+  "core": true
+}

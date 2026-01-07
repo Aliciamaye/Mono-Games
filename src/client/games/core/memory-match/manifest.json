@@ -1,0 +1,30 @@
+{
+  "id": "memory-match",
+  "name": "Memory Match",
+  "version": "1.0.0",
+  "description": "Classic memory card matching game. Find all the pairs!",
+  "author": "Mono Games",
+  "category": "puzzle",
+  "tags": ["puzzle", "memory", "cards", "matching", "concentration"],
+  "thumbnail": "/games/memory-match/thumb.png",
+  "controls": {
+    "mouse": {
+      "Click": "Flip a card"
+    },
+    "touch": {
+      "Tap": "Flip a card"
+    }
+  },
+  "features": [
+    "Classic memory gameplay",
+    "8 unique pairs",
+    "Move counter",
+    "Score tracking",
+    "Colorful emoji cards"
+  ],
+  "highScoreEnabled": true,
+  "leaderboardEnabled": true,
+  "achievementsEnabled": true,
+  "size": "20KB",
+  "core": true
+}

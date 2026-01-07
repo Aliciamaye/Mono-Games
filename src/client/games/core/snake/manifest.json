@@ -1,0 +1,41 @@
+{
+  "id": "snake",
+  "name": "Snake",
+  "version": "1.0.0",
+  "description": "Classic snake game - eat apples and grow longer!",
+  "category": "arcade",
+  "difficulty": "easy",
+  "genre": ["arcade", "classic"],
+  "players": {
+    "min": 1,
+    "max": 1
+  },
+  "features": {
+    "offline": true,
+    "online": true,
+    "multiplayer": false,
+    "leaderboard": true,
+    "achievements": true
+  },
+  "controls": {
+    "keyboard": ["Arrow Keys", "WASD", "Space (Pause)"],
+    "touch": ["Swipe to move"]
+  },
+  "requirements": {
+    "minScreenWidth": 320,
+    "minScreenHeight": 480
+  },
+  "assets": {
+    "icon": "./icon.png",
+    "thumbnail": "./thumbnail.png",
+    "screenshots": ["./screenshot1.png", "./screenshot2.png"]
+  },
+  "size": "2KB",
+  "core": true,
+  "tags": ["retro", "classic", "arcade", "snake", "casual"],
+  "rating": 4.8,
+  "downloads": 0,
+  "author": "Mono Games Team",
+  "createdAt": "2026-01-07",
+  "updatedAt": "2026-01-07"
+}

@@ -1,0 +1,89 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+*.lcov
+
+# Production builds
+dist/
+build/
+*.exe
+*.dmg
+*.app
+*.apk
+*.aab
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.classpath
+
+# Electron
+src/desktop/dist/
+src/desktop/out/
+release/
+
+# Android
+src/mobile/android/app/release/
+src/mobile/android/app/debug/
+src/mobile/android/.gradle/
+src/mobile/android/local.properties
+src/mobile/android/build/
+*.keystore
+*.jks
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Package manager
+.npm
+.yarn
+.pnpm-store
+
+# Service worker
+src/client/sw.js
+src/client/workbox-*.js
+
+# Build artifacts
+*.tgz
+*.zip
+packaged-games/
+
+# Debug
+.debugging/
+debug.log
+
+# Editor backups
+*.bak
+*.orig

@@ -1,0 +1,28 @@
+{
+  "id": "pong",
+  "name": "Pong",
+  "version": "1.0.0",
+  "description": "Classic paddle tennis game. Beat the AI and score points!",
+  "author": "Mono Games",
+  "category": "sports",
+  "tags": ["sports", "arcade", "classic", "pong", "paddle"],
+  "thumbnail": "/games/pong/thumb.png",
+  "controls": {
+    "keyboard": {
+      "W": "Move paddle up",
+      "S": "Move paddle down"
+    }
+  },
+  "features": [
+    "Classic Pong gameplay",
+    "AI opponent",
+    "Progressive difficulty",
+    "Score tracking",
+    "First to 10 wins"
+  ],
+  "highScoreEnabled": true,
+  "leaderboardEnabled": true,
+  "achievementsEnabled": true,
+  "size": "30KB",
+  "core": true
+}

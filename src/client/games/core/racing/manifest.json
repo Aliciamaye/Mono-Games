@@ -1,0 +1,41 @@
+{
+  "id": "racing",
+  "name": "Turbo Racer",
+  "version": "1.0.0",
+  "description": "High-speed lane-based racing! Dodge traffic, collect power-ups, and race to the finish!",
+  "author": "Mono Games",
+  "category": "racing",
+  "tags": ["racing", "cars", "action", "endless", "power-ups"],
+  "thumbnail": "/games/racing/thumb.png",
+  "controls": {
+    "keyboard": {
+      "ArrowLeft / A": "Move left lane",
+      "ArrowRight / D": "Move right lane",
+      "ArrowUp / W": "Accelerate",
+      "ArrowDown / S": "Brake",
+      "Space": "Activate Nitro Boost"
+    },
+    "touch": {
+      "Swipe Left": "Move left",
+      "Swipe Right": "Move right",
+      "Tap": "Accelerate"
+    }
+  },
+  "features": [
+    "4-lane racing action",
+    "Power-ups: Coins, Nitro, Shield, Magnet",
+    "Multiple obstacles types",
+    "Drift mechanics",
+    "Particle effects",
+    "Combo system",
+    "Progressive difficulty",
+    "Health & Nitro management",
+    "Sound effects & music",
+    "Touch controls for mobile"
+  ],
+  "highScoreEnabled": true,
+  "leaderboardEnabled": true,
+  "achievementsEnabled": true,
+  "size": "150KB",
+  "core": true
+}

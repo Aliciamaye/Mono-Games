@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mono-games.vercel.app/sitemap.xml

@@ -1,0 +1,31 @@
+{
+  "id": "tetris",
+  "name": "Tetris",
+  "version": "1.0.0",
+  "description": "Classic falling blocks puzzle game. Stack pieces and clear lines!",
+  "author": "Mono Games",
+  "category": "arcade",
+  "tags": ["puzzle", "arcade", "classic", "tetris", "blocks"],
+  "thumbnail": "/games/tetris/thumb.png",
+  "controls": {
+    "keyboard": {
+      "ArrowLeft": "Move left",
+      "ArrowRight": "Move right",
+      "ArrowDown": "Soft drop",
+      "ArrowUp": "Rotate",
+      "Space": "Hard drop"
+    }
+  },
+  "features": [
+    "Classic Tetris gameplay",
+    "Progressive difficulty",
+    "Line clearing mechanics",
+    "Score multipliers",
+    "Level progression"
+  ],
+  "highScoreEnabled": true,
+  "leaderboardEnabled": true,
+  "achievementsEnabled": true,
+  "size": "100KB",
+  "core": true
+}
