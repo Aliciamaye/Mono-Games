@@ -2,7 +2,30 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import api from '../services/api';
 
-const useAuthStore = create(
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  avatar?: string;
+  createdAt: string;
+}
+
+interface AuthState {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+  initAuth: () => void;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (username: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  verifyToken: () => Promise<void>;
+  logout: () => void;
+  updateProfile: (updates: Partial<User>) => Promise<{ success: boolean; error?: string }>;
+  clearError: () => void;
+}
+
+const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       // Auth state
@@ -36,7 +59,7 @@ const useAuthStore = create(
           });
           
           return { success: true };
-        } catch (error) {
+        } catch (error: any) {
           set({
             error: error.response?.data?.message || 'Login failed',
             isLoading: false
@@ -64,7 +87,7 @@ const useAuthStore = create(
           });
           
           return { success: true };
-        } catch (error) {
+        } catch (error: any) {
           set({
             error: error.response?.data?.message || 'Registration failed',
             isLoading: false
@@ -107,7 +130,7 @@ const useAuthStore = create(
             isLoading: false
           });
           return { success: true };
-        } catch (error) {
+        } catch (error: any) {
           set({
             error: error.response?.data?.message || 'Update failed',
             isLoading: false

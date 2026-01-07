@@ -4,7 +4,6 @@ import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
-import rateLimit from 'express-rate-limit';
 
 // Import routes
 import authRoutes from './routes/auth.js';
@@ -17,6 +16,8 @@ import saveRoutes from './routes/saves.js';
 // Import middleware
 import { errorHandler } from './middleware/errorHandler.js';
 import { requestLogger } from './middleware/logger.js';
+import { cacheMiddleware, getCacheStats } from './middleware/cache.js';
+import { adaptiveRateLimit, rateLimiters } from './middleware/advancedRateLimit.js';
 
 // Load environment variables
 dotenv.config();
@@ -49,15 +50,10 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false
-});
-app.use('/api/', limiter);
+// Rate limiting - Use adaptive rate limiter
+app.use('/api/', adaptiveRateLimit(100));
+app.use('/api/auth', rateLimiters.auth);
+app.use('/api/leaderboard/submit', rateLimiters.scoreSubmit);
 
 // Compression
 app.use(compression());
@@ -74,12 +70,24 @@ app.use(requestLogger);
 
 // Health check
 app.get('/health', (req, res) => {
+  const cacheStats = getCacheStats();
+  
   res.status(200).json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    cache: cacheStats,
+    memory: {
+      used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + ' MB',
+      total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024) + ' MB'
+    }
   });
+});
+
+// Cache statistics endpoint (admin only)
+app.get('/api/admin/cache/stats', (req, res) => {
+  res.json(getCacheStats());
 });
 
 // API routes

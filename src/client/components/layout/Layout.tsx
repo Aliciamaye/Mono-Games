@@ -1,6 +1,13 @@
 import { Link, useLocation } from 'react-router-dom';
+import ThemeBackground from '../ThemeBackground';
+import { GamepadIcon, StoreIcon, TrophyIcon, SettingsIcon } from '../Icons';
+import type React from 'react';
 
-function Layout({ children }) {
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const isGamePlay = location.pathname.startsWith('/play/');
 
@@ -10,7 +17,9 @@ function Layout({ children }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <>
+      <ThemeBackground />
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Navigation */}
       <nav style={{
         background: 'var(--bg-light)',
@@ -34,36 +43,48 @@ function Layout({ children }) {
             <Link to="/launcher">
               <button className="retro-btn" style={{
                 fontSize: '0.75rem',
-                padding: '0.5rem 1rem'
+                padding: '0.5rem 1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
               }}>
-                🎮 Launcher
+                <GamepadIcon size={16} /> Launcher
               </button>
             </Link>
             
             <Link to="/store">
               <button className="retro-btn retro-btn-secondary" style={{
                 fontSize: '0.75rem',
-                padding: '0.5rem 1rem'
+                padding: '0.5rem 1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
               }}>
-                🏪 Store
+                <StoreIcon size={16} /> Store
               </button>
             </Link>
             
             <Link to="/leaderboard">
               <button className="retro-btn retro-btn-secondary" style={{
                 fontSize: '0.75rem',
-                padding: '0.5rem 1rem'
+                padding: '0.5rem 1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
               }}>
-                🏆 Leaderboard
+                <TrophyIcon size={16} /> Leaderboard
               </button>
             </Link>
             
             <Link to="/settings">
               <button className="retro-btn retro-btn-secondary" style={{
                 fontSize: '0.75rem',
-                padding: '0.5rem 1rem'
+                padding: '0.5rem 1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
               }}>
-                ⚙️ Settings
+                <SettingsIcon size={16} /> Settings
               </button>
             </Link>
           </div>
@@ -83,8 +104,8 @@ function Layout({ children }) {
         marginTop: '4rem'
       }}>
         <div className="container text-center">
-          <p className="retro-text" style={{ marginBottom: '0.5rem' }}>
-            Made with ❤️ by Mono Games Team
+          <p className="retro-text" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+            Made with <span style={{ color: '#E63946', fontSize: '1.2em' }}>❤️</span> by Mono Games Team
           </p>
           <p className="retro-text" style={{
             fontSize: '0.875rem',
@@ -94,7 +115,8 @@ function Layout({ children }) {
           </p>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   );
 }
 

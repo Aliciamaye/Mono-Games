@@ -1,7 +1,60 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-const useSettingsStore = create(
+interface AudioSettings {
+  masterVolume: number;
+  musicVolume: number;
+  sfxVolume: number;
+  muted: boolean;
+}
+
+interface GraphicsSettings {
+  quality: 'low' | 'medium' | 'high';
+  effects: boolean;
+  particles: boolean;
+  scanlines: boolean;
+  crtEffect: boolean;
+}
+
+interface GameplaySettings {
+  difficulty: 'easy' | 'normal' | 'hard';
+  vibration: boolean;
+  autoSave: boolean;
+  aiEnabled: boolean;
+  aiLevel: number;
+}
+
+interface DisplaySettings {
+  theme: 'light' | 'dark' | 'ocean' | 'sunset' | 'forest' | 'purple';
+  fps: boolean;
+  fullscreen: boolean;
+}
+
+interface NotificationSettings {
+  achievements: boolean;
+  updates: boolean;
+  friends: boolean;
+}
+
+interface Settings {
+  audio: AudioSettings;
+  graphics: GraphicsSettings;
+  gameplay: GameplaySettings;
+  display: DisplaySettings;
+  notifications: NotificationSettings;
+}
+
+interface SettingsStore {
+  settings: Settings;
+  updateSetting: (category: keyof Settings, key: string, value: any) => void;
+  updateSettings: (newSettings: Partial<Settings>) => void;
+  resetSettings: () => void;
+  toggleFullscreen: () => void;
+  toggleMute: () => void;
+  loadSettings: () => void;
+}
+
+const useSettingsStore = create<SettingsStore>()(
   persist(
     (set, get) => ({
       // Settings state
@@ -27,8 +80,8 @@ const useSettingsStore = create(
           aiLevel: 3 // 1=Very Easy, 2=Easy, 3=Normal, 4=Hard, 5=Expert
         },
         display: {
-          theme: 'default', // default, blue, green, red
-          fps: true,
+          theme: 'light', // light, dark, ocean, sunset, forest, purple
+          fps: false,
           fullscreen: false
         },
         notifications: {
@@ -84,8 +137,8 @@ const useSettingsStore = create(
               aiLevel: 3
             },
             display: {
-              theme: 'default',
-              fps: true,
+              theme: 'light',
+              fps: false,
               fullscreen: false
             },
             notifications: {

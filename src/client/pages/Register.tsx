@@ -3,6 +3,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 import { validatePassword, isValidEmail, isValidUsername } from '../utils/security';
+import {
+  GamepadIcon, EmailIcon, LockIcon, EyeIcon, EyeOffIcon,
+  AlertIcon, CloudIcon, SparklesIcon, PlayIcon, UserIcon, TrophyIcon, CheckIcon
+} from '../components/Icons';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -87,28 +91,42 @@ export default function Register() {
 
   const getStrengthText = () => {
     if (!passwordStrength) return '';
-    if (passwordStrength.strength < 30) return 'Weak 😟';
-    if (passwordStrength.strength < 60) return 'Good 😊';
-    return 'Strong 💪';
+    if (passwordStrength.strength < 30) return 'Weak';
+    if (passwordStrength.strength < 60) return 'Good';
+    return 'Strong';
   };
 
   return (
     <div className="register-page">
       <div className="register-container cartoony-container">
-        {/* Decorative elements */}
-        <div className="doodle-star doodle-1">🌟</div>
-        <div className="doodle-star doodle-2">⭐</div>
-        <div className="doodle-star doodle-3">✨</div>
-        <div className="doodle-cloud cloud-1">☁️</div>
-        <div className="doodle-cloud cloud-2">☁️</div>
-        <div className="floating-gamepad">🎮</div>
-        <div className="floating-trophy">🏆</div>
+        {/* Decorative SVG elements */}
+        <div className="doodle-star doodle-1">
+          <SparklesIcon size={48} color="#FFD700" />
+        </div>
+        <div className="doodle-star doodle-2">
+          <SparklesIcon size={42} color="#FFA500" />
+        </div>
+        <div className="doodle-star doodle-3">
+          <SparklesIcon size={38} color="#FF6B35" />
+        </div>
+        <div className="doodle-cloud cloud-1">
+          <CloudIcon size={64} color="#87CEEB" />
+        </div>
+        <div className="doodle-cloud cloud-2">
+          <CloudIcon size={56} color="#B8E4F9" />
+        </div>
+        <div className="floating-gamepad">
+          <GamepadIcon size={64} color="var(--primary)" />
+        </div>
+        <div className="floating-trophy">
+          <TrophyIcon size={64} color="#FFD700" />
+        </div>
 
         <div className="register-box cartoony-card">
           {/* Header */}
           <div className="register-header">
-            <h1 className="cartoony-title" style={{ fontSize: '3rem' }}>
-              ✨ Join Mono Games!
+            <h1 className="cartoony-title" style={{ fontSize: '3rem', display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center' }}>
+              <SparklesIcon size={48} color="var(--primary)" /> Join Mono Games!
             </h1>
             <div className="cartoony-divider"></div>
             <p className="cartoony-subtitle">Create your account and start playing!</p>
@@ -116,16 +134,16 @@ export default function Register() {
 
           {/* Error Message */}
           {error && (
-            <div className="error-bubble cartoony-badge" style={{ backgroundColor: '#FF6B6B' }}>
-              ⚠️ {error}
+            <div className="error-bubble cartoony-badge" style={{ backgroundColor: '#FF6B6B', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <AlertIcon size={20} color="white" /> {error}
             </div>
           )}
 
           {/* Registration Form */}
           <form onSubmit={handleSubmit} className="register-form">
             <div className="form-group">
-              <label className="cartoony-label">
-                👤 Username
+              <label className="cartoony-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <UserIcon size={20} color="var(--primary)" /> Username
               </label>
               <input
                 type="text"
@@ -141,8 +159,8 @@ export default function Register() {
             </div>
 
             <div className="form-group">
-              <label className="cartoony-label">
-                📧 Email
+              <label className="cartoony-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <EmailIcon size={20} color="var(--primary)" /> Email
               </label>
               <input
                 type="email"
@@ -156,8 +174,8 @@ export default function Register() {
             </div>
 
             <div className="form-group">
-              <label className="cartoony-label">
-                🔒 Password
+              <label className="cartoony-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <LockIcon size={20} color="var(--primary)" /> Password
               </label>
               <div className="password-input-wrapper">
                 <input
@@ -174,7 +192,7 @@ export default function Register() {
                   className="password-toggle cartoony-btn-small"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? '👁️' : '👁️‍🗨️'}
+                  {showPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
                 </button>
               </div>
               {passwordStrength && (
@@ -196,8 +214,8 @@ export default function Register() {
             </div>
 
             <div className="form-group">
-              <label className="cartoony-label">
-                🔐 Confirm Password
+              <label className="cartoony-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <LockIcon size={20} color="var(--primary)" /> Confirm Password
               </label>
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -229,8 +247,13 @@ export default function Register() {
                 type="submit"
                 className="cartoony-btn cartoony-btn-primary"
                 disabled={loading || !agreedToTerms}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}
               >
-                {loading ? '⏳ Creating Account...' : '🚀 Create Account!'}
+                {loading ? '⏳ Creating Account...' : (
+                  <>
+                    <PlayIcon size={20} color="white" /> Create Account!
+                  </>
+                )}
               </button>
             </div>
           </form>
@@ -256,8 +279,8 @@ export default function Register() {
           {/* Footer Links */}
           <div className="register-footer">
             <span className="cartoony-text">Already have an account?</span>
-            <Link to="/login" className="cartoony-link">
-              🎮 Login Here
+            <Link to="/login" className="cartoony-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+              <GamepadIcon size={16} /> Login Here
             </Link>
           </div>
         </div>

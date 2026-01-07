@@ -2,21 +2,27 @@ import BaseGame from '../../shared/framework/BaseGame.js';
 import { getAI, AI_LEVELS } from '../../shared/AIOpponent.js';
 
 /**
- * Tic Tac Toe with AI
+ * Tic Tac Toe with AI and Local Multiplayer
  */
 class TicTacToe extends BaseGame {
     constructor(containerId) {
-        super(containerId, 'tic-tac-toe', 400, 450);
+        super(containerId, 'tic-tac-toe', 400, 500);
 
         this.ai = getAI(3);
         this.aiLevel = 3;
 
+        // Game mode: 'ai' or 'local'
+        this.gameMode = 'local';
         this.board = Array(9).fill(null);
-        this.currentPlayer = 'X'; // X = human, O = AI
+        this.currentPlayer = 'X';
         this.winner = null;
         this.winningLine = null;
         this.gameOver = false;
         this.aiThinking = false;
+        
+        // Scores
+        this.xScore = 0;
+        this.oScore = 0;
     }
 
     setup() {
@@ -34,17 +40,30 @@ class TicTacToe extends BaseGame {
     setupControls() {
         // Click handling
         this.canvas.addEventListener('click', (e) => {
-            if (this.gameOver || this.currentPlayer !== 'X' || this.aiThinking) return;
+            if (this.gameOver || this.aiThinking) return;
+            if (this.gameMode === 'ai' && this.currentPlayer !== 'X') return;
 
             const rect = this.canvas.getBoundingClientRect();
             const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top - 50; // Account for header area
+            const y = e.clientY - rect.top;
 
-            if (y < 0) return;
+            // Check mode button (top area)
+            if (y < 50) {
+                const buttonWidth = 180;
+                const buttonX = this.canvas.width / 2 - buttonWidth / 2;
+                if (x >= buttonX && x <= buttonX + buttonWidth && y >= 10 && y <= 40) {
+                    this.toggleGameMode();
+                    return;
+                }
+            }
+
+            const offsetY = 80;
+            const gameY = y - offsetY;
+            if (gameY < 0) return;
 
             const cellSize = this.canvas.width / 3;
             const col = Math.floor(x / cellSize);
-            const row = Math.floor(y / cellSize);
+            const row = Math.floor(gameY / cellSize);
             const index = row * 3 + col;
 
             if (index >= 0 && index < 9 && this.board[index] === null) {
@@ -53,6 +72,12 @@ class TicTacToe extends BaseGame {
         });
 
         this.addKeyHandler('r', () => { this.reset(); });
+        this.addKeyHandler('m', () => { this.toggleGameMode(); });
+    }
+
+    toggleGameMode() {
+        this.gameMode = this.gameMode === 'ai' ? 'local' : 'ai';
+        this.reset();
     }
 
     makeMove(index) {
@@ -66,7 +91,10 @@ class TicTacToe extends BaseGame {
             this.gameOver = true;
 
             if (this.winner === 'X') {
+                this.xScore += 1;
                 this.score += 100;
+            } else if (this.winner === 'O') {
+                this.oScore += 1;
             }
             return;
         }
@@ -81,8 +109,8 @@ class TicTacToe extends BaseGame {
         // Switch player
         this.currentPlayer = this.currentPlayer === 'X' ? 'O' : 'X';
 
-        // AI turn
-        if (this.currentPlayer === 'O') {
+        // AI turn in AI mode
+        if (this.gameMode === 'ai' && this.currentPlayer === 'O' && !this.gameOver) {
             this.aiThinking = true;
             setTimeout(() => this.makeAIMove(), 500);
         }
@@ -127,27 +155,39 @@ class TicTacToe extends BaseGame {
         this.ctx.fillStyle = bgGradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Header
-        this.ctx.font = 'bold 24px "Comic Sans MS", cursive';
-        this.ctx.fillStyle = '#2C3E50';
-        this.ctx.textAlign = 'center';
+        // Mode toggle button
+        const buttonWidth = 180;
+        const buttonHeight = 30;
+        const buttonX = this.canvas.width / 2 - buttonWidth / 2;
+        const buttonY = 10;
 
-        let statusText;
-        if (this.gameOver) {
-            if (this.winner) {
-                statusText = this.winner === 'X' ? '🎉 You Win!' : '🤖 AI Wins!';
-            } else {
-                statusText = "🤝 It's a Draw!";
-            }
-        } else if (this.aiThinking) {
-            statusText = '🤖 AI thinking...';
-        } else {
-            statusText = this.currentPlayer === 'X' ? '❌ Your Turn' : '⭕ AI Turn';
-        }
-        this.ctx.fillText(statusText, this.canvas.width / 2, 35);
+        this.ctx.fillStyle = this.gameMode === 'local' ? '#4ECDC4' : '#FF6B35';
+        this.ctx.beginPath();
+        this.ctx.roundRect(buttonX, buttonY, buttonWidth, buttonHeight, 15);
+        this.ctx.fill();
+
+        this.ctx.fillStyle = 'white';
+        this.ctx.font = 'bold 14px "Comic Sans MS", cursive';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText(
+            this.gameMode === 'local' ? 'Local 1v1 (M)' : 'vs AI (M)',
+            this.canvas.width / 2,
+            buttonY + buttonHeight / 2
+        );
+
+        // Scores
+        this.ctx.font = 'bold 18px "Comic Sans MS", cursive';
+        this.ctx.fillStyle = '#4ECDC4';
+        this.ctx.textAlign = 'left';
+        this.ctx.fillText(`X: ${this.xScore}`, 20, 60);
+
+        this.ctx.fillStyle = '#E63946';
+        this.ctx.textAlign = 'right';
+        this.ctx.fillText(`O: ${this.oScore}`, this.canvas.width - 20, 60);
 
         // Grid
-        const offsetY = 50;
+        const offsetY = 80;
         const cellSize = this.canvas.width / 3;
 
         this.ctx.strokeStyle = '#FF6B35';
@@ -200,15 +240,44 @@ class TicTacToe extends BaseGame {
             this.ctx.stroke();
         }
 
+        // Game status
+        this.ctx.font = 'bold 20px "Comic Sans MS", cursive';
+        this.ctx.fillStyle = '#2C3E50';
+        this.ctx.textAlign = 'center';
+
+        if (this.gameOver) {
+            let statusText;
+            if (this.winner) {
+                if (this.gameMode === 'local') {
+                    statusText = `Player ${this.winner} Wins!`;
+                } else {
+                    statusText = this.winner === 'X' ? 'You Win!' : 'AI Wins!';
+                }
+            } else {
+                statusText = "It's a Draw!";
+            }
+            this.ctx.fillText(statusText, this.canvas.width / 2, offsetY + 3 * cellSize + 30);
+
+            this.ctx.font = '16px "Comic Sans MS", cursive';
+            this.ctx.fillStyle = '#FF6B35';
+            this.ctx.fillText('Press R to play again', this.canvas.width / 2, offsetY + 3 * cellSize + 55);
+        } else if (this.aiThinking) {
+            this.ctx.fillText('AI thinking...', this.canvas.width / 2, offsetY + 3 * cellSize + 30);
+        } else {
+            let turnText;
+            if (this.gameMode === 'local') {
+                turnText = `Player ${this.currentPlayer}'s Turn`;
+            } else {
+                turnText = this.currentPlayer === 'X' ? 'Your Turn' : "AI's Turn";
+            }
+            this.ctx.fillText(turnText, this.canvas.width / 2, offsetY + 3 * cellSize + 30);
+        }
+
         // Footer
         this.ctx.font = '14px "Comic Sans MS", cursive';
         this.ctx.fillStyle = '#90A4AE';
-        this.ctx.fillText(`AI: ${AI_LEVELS[this.aiLevel].name}`, this.canvas.width / 2, this.canvas.height - 10);
-
-        if (this.gameOver) {
-            this.ctx.font = '16px "Comic Sans MS", cursive';
-            this.ctx.fillStyle = '#FF6B35';
-            this.ctx.fillText('Press R to play again', this.canvas.width / 2, this.canvas.height - 30);
+        if (this.gameMode === 'ai') {
+            this.ctx.fillText(`AI: ${AI_LEVELS[this.aiLevel].name}`, this.canvas.width / 2, this.canvas.height - 10);
         }
     }
 

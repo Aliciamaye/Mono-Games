@@ -1,64 +1,70 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import useGameStore from '../store/gameStore';
-import { CORE_GAMES } from '../services/gameStore';
+import { GAME_REGISTRY } from '../config/gameRegistry';
+import {
+  GamepadIcon, SearchIcon, TrophyIcon, StarIcon, PlayIcon,
+  SnakeIcon, PongIcon, TetrisIcon, PuzzleIcon, RacingIcon
+} from '../components/Icons';
 import '../styles/cartoony-theme.css';
 import '../styles/decorations.css';
+import type React from 'react';
 
-function GameLauncher() {
+interface Game {
+  id: string;
+  name: string;
+  category: string;
+  renderer: string;
+  multiplayer: boolean;
+  description: string;
+  difficulty: string;
+  installed: boolean;
+  size: string;
+  rating: number;
+  badge?: string;
+}
+
+const GameLauncher: React.FC = () => {
   const navigate = useNavigate();
   const { installedGames, loadGames, isLoading } = useGameStore();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState('all');
-  const [viewMode, setViewMode] = useState('grid'); // grid or list
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [filter, setFilter] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     loadGames();
   }, [loadGames]);
 
-  const gameIcons = {
-    'snake': '🐍',
-    'pong': '🏓',
-    'tetris': '🧱',
-    '2048': '🔢',
-    'memory-match': '🃏',
-    'racing': '🏎️',
-    'breakout': '🧱',
-    'tic-tac-toe': '❌',
-    'connect-four': '🔴',
-    'flappy-bird': '🐦',
-    'minesweeper': '💣',
-    'space-invaders': '👾',
-    'chess': '♟️'
+  // Game icon mapping
+  const getGameIcon = (gameId: string, size: number = 48): React.ReactNode => {
+    const iconMap = {
+      'snake': <SnakeIcon size={size} color="var(--primary)" />,
+      'pong': <PongIcon size={size} color="var(--primary)" />,
+      'tetris': <TetrisIcon size={size} color="var(--primary)" />,
+      'racing': <RacingIcon size={size} color="var(--primary)" />,
+      '2048': <PuzzleIcon size={size} color="var(--primary)" />,
+      'memory-match': <PuzzleIcon size={size} color="var(--primary)" />,
+    };
+    
+    return iconMap[gameId] || <GamepadIcon size={size} color="var(--primary)" />;
   };
 
-  const gameBadges = {
-    'pong': 'AI',
-    '2048': 'NEW',
-    'racing': 'HOT',
-    'snake': null
-  };
-
-  const coreGames = CORE_GAMES.map((id) => ({
-    id,
-    name: formatGameName(id),
-    icon: gameIcons[id] || '🎮',
-    badge: gameBadges[id] || null,
-    core: true,
-    installed: true,
-    size: '2MB',
-    version: '1.0.0',
-    lastPlayed: getRandomDate()
+  const allGames = GAME_REGISTRY.map((game) => ({
+    ...game,
+    icon: getGameIcon(game.id),
   }));
 
-  const allGames = [...coreGames, ...installedGames.filter((g) => !g.core)];
-
   const filteredGames = allGames.filter((game) => {
-    const matchesSearch = game.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = game.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         game.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter =
       filter === 'all' ||
-      (filter === 'core' && game.core) ||
-      (filter === 'downloaded' && !game.core);
+      (filter === 'featured' && game.featured) ||
+      (filter === 'new' && game.new) ||
+      (filter === 'hot' && game.hot) ||
+      (filter === '3d' && game.renderer === 'three') ||
+      (filter === 'multiplayer' && game.multiplayer) ||
+      (filter === game.category);
     return matchesSearch && matchesFilter;
   });
 

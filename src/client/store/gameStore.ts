@@ -2,9 +2,38 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { getAllGames, getInstalledGames, downloadGame } from '../services/gameStore';
 
-const useGameStore = create(
+interface Game {
+  id: string;
+  name: string;
+  category: string;
+  renderer: string;
+  multiplayer: boolean;
+  description: string;
+  difficulty: string;
+  installed: boolean;
+  size: string;
+  rating: number;
+  badge?: string;
+  core?: boolean;
+}
+
+interface GameStore {
+  installedGames: Game[];
+  availableGames: Game[];
+  currentGame: Game | null;
+  downloadQueue: string[];
+  isLoading: boolean;
+  error: string | null;
+  loadGames: () => Promise<void>;
+  setCurrentGame: (game: Game | null) => void;
+  installGame: (gameId: string) => Promise<{ success: boolean; error?: string }>;
+  uninstallGame: (gameId: string) => Promise<void>;
+  clearError: () => void;
+}
+
+const useGameStore = create<GameStore>()(
   persist(
-    (set, get) => ({
+    (set, _get) => ({
       // Game state
       installedGames: [],
       availableGames: [],
@@ -25,9 +54,9 @@ const useGameStore = create(
             availableGames: available,
             isLoading: false
           });
-        } catch (error) {
+        } catch (error: any) {
           set({
-            error: error.message,
+            error: error?.message || 'Failed to load games',
             isLoading: false
           });
         }
@@ -40,60 +69,25 @@ const useGameStore = create(
       installGame: async (gameId) => {
         set({ isLoading: true, error: null });
         try {
-          const game = await downloadGame(gameId, (progress) => {
-            // Update download progress
-            set((state) => ({
-              downloadQueue: state.downloadQueue.map((item) =>
-                item.id === gameId ? { ...item, progress } : item
-              )
-            }));
-          });
-
+          const game = await downloadGame(gameId, () => {});
           set((state) => ({
-            installedGames: [...state.installedGames, game],
-            downloadQueue: state.downloadQueue.filter((item) => item.id !== gameId),
+            installedGames: [...state.installedGames, game as Game],
             isLoading: false
           }));
-
           return { success: true };
-        } catch (error) {
+        } catch (error: any) {
           set({
-            error: error.message,
+            error: error?.message || 'Installation failed',
             isLoading: false
           });
-          return { success: false, error: error.message };
+          return { success: false, error: error?.message };
         }
       },
 
-      uninstallGame: (gameId) => {
+      uninstallGame: async (gameId) => {
         set((state) => ({
           installedGames: state.installedGames.filter((game) => game.id !== gameId)
         }));
-      },
-
-      addToDownloadQueue: (game) => {
-        set((state) => ({
-          downloadQueue: [...state.downloadQueue, { ...game, progress: 0 }]
-        }));
-      },
-
-      removeFromDownloadQueue: (gameId) => {
-        set((state) => ({
-          downloadQueue: state.downloadQueue.filter((item) => item.id !== gameId)
-        }));
-      },
-
-      updateGameProgress: (gameId, progress) => {
-        set((state) => ({
-          installedGames: state.installedGames.map((game) =>
-            game.id === gameId ? { ...game, progress } : game
-          )
-        }));
-      },
-
-      isGameInstalled: (gameId) => {
-        const { installedGames } = get();
-        return installedGames.some((game) => game.id === gameId);
       },
 
       clearError: () => set({ error: null })

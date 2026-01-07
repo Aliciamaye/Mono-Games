@@ -2,7 +2,7 @@ import BaseGame from '../../shared/framework/BaseGame.js';
 import { getAI, AI_LEVELS } from '../../shared/AIOpponent.js';
 
 /**
- * Classic Pong Game with AI
+ * Classic Pong Game with AI and Local Multiplayer
  */
 class PongGame extends BaseGame {
   constructor(containerId) {
@@ -10,6 +10,9 @@ class PongGame extends BaseGame {
 
     this.ai = getAI(3);
     this.aiLevel = 3;
+
+    // Game mode: 'ai' or 'local'
+    this.gameMode = 'local';
 
     // Paddle settings
     this.paddleWidth = 15;
@@ -20,6 +23,9 @@ class PongGame extends BaseGame {
     this.ballSize = 12;
     this.ballSpeedX = 5;
     this.ballSpeedY = 3;
+
+    // Player 2 keys for local multiplayer
+    this.player2Keys = { up: false, down: false };
   }
 
   setup() {
@@ -44,20 +50,34 @@ class PongGame extends BaseGame {
   }
 
   setupControls() {
+    // Player 1 controls
     this.addKeyHandler('arrowup', () => { this.keys.up = true; });
     this.addKeyHandler('w', () => { this.keys.up = true; });
     this.addKeyHandler('arrowdown', () => { this.keys.down = true; });
     this.addKeyHandler('s', () => { this.keys.down = true; });
+    
+    // Player 2 controls (only for local multiplayer)
+    this.addKeyHandler('i', () => { this.player2Keys.up = true; });
+    this.addKeyHandler('k', () => { this.player2Keys.down = true; });
+
     this.addKeyHandler(' ', () => {
       this.isPaused ? this.resume() : this.pause();
     });
     this.addKeyHandler('r', () => { this.reset(); });
+    this.addKeyHandler('m', () => { this.toggleGameMode(); });
 
     // Key up handling
     document.addEventListener('keyup', (e) => {
       if (e.key === 'ArrowUp' || e.key === 'w') this.keys.up = false;
       if (e.key === 'ArrowDown' || e.key === 's') this.keys.down = false;
+      if (e.key === 'i') this.player2Keys.up = false;
+      if (e.key === 'k') this.player2Keys.down = false;
     });
+  }
+
+  toggleGameMode() {
+    this.gameMode = this.gameMode === 'ai' ? 'local' : 'ai';
+    this.reset();
   }
 
   update(deltaTime) {
@@ -69,22 +89,32 @@ class PongGame extends BaseGame {
       this.paddle1Y += this.paddleSpeed;
     }
 
-    // AI paddle movement
-    const aiConfig = AI_LEVELS[this.aiLevel];
-    const targetY = this.ballY - this.paddleHeight / 2;
-    const diff = targetY - this.paddle2Y;
+    // AI paddle movement (only in AI mode)
+    if (this.gameMode === 'ai') {
+      const aiConfig = AI_LEVELS[this.aiLevel];
+      const targetY = this.ballY - this.paddleHeight / 2;
+      const diff = targetY - this.paddle2Y;
 
-    if (Math.abs(diff) > 5) {
-      const aiSpeed = this.paddleSpeed * (aiConfig.accuracy / 100);
-      if (diff > 0) {
-        this.paddle2Y += Math.min(aiSpeed, diff);
-      } else {
-        this.paddle2Y -= Math.min(aiSpeed, -diff);
+      if (Math.abs(diff) > 5) {
+        const aiSpeed = this.paddleSpeed * (aiConfig.accuracy / 100);
+        if (diff > 0) {
+          this.paddle2Y += Math.min(aiSpeed, diff);
+        } else {
+          this.paddle2Y -= Math.min(aiSpeed, -diff);
+        }
+      }
+
+      // Keep AI paddle in bounds
+      this.paddle2Y = Math.max(0, Math.min(this.canvas.height - this.paddleHeight, this.paddle2Y));
+    } else {
+      // Player 2 paddle movement (local multiplayer)
+      if (this.player2Keys.up && this.paddle2Y > 0) {
+        this.paddle2Y -= this.paddleSpeed;
+      }
+      if (this.player2Keys.down && this.paddle2Y < this.canvas.height - this.paddleHeight) {
+        this.paddle2Y += this.paddleSpeed;
       }
     }
-
-    // Keep AI paddle in bounds
-    this.paddle2Y = Math.max(0, Math.min(this.canvas.height - this.paddleHeight, this.paddle2Y));
 
     // Ball movement
     this.ballX += this.ballVelX;
@@ -153,6 +183,28 @@ class PongGame extends BaseGame {
     this.ctx.fillStyle = bgGradient;
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
+    // Mode toggle button (top-right)
+    const buttonWidth = 150;
+    const buttonHeight = 30;
+    const buttonX = this.canvas.width - buttonWidth - 10;
+    const buttonY = 10;
+
+    this.ctx.fillStyle = this.gameMode === 'local' ? '#4ECDC4' : '#FF6B35';
+    this.ctx.beginPath();
+    this.roundRect(buttonX, buttonY, buttonWidth, buttonHeight, 15);
+    this.ctx.fill();
+
+    this.ctx.fillStyle = 'white';
+    this.ctx.font = 'bold 14px Arial';
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+    this.ctx.fillText(
+      this.gameMode === 'local' ? 'Local 1v1 (M)' : 'vs AI (M)',
+      buttonX + buttonWidth / 2,
+      buttonY + buttonHeight / 2
+    );
+    this.ctx.textAlign = 'left';
+
     // Center line
     this.ctx.setLineDash([10, 10]);
     this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
@@ -206,13 +258,27 @@ class PongGame extends BaseGame {
     // Labels
     this.ctx.font = '16px "Comic Sans MS", cursive';
     this.ctx.fillStyle = '#FFFFFF';
-    this.ctx.fillText('YOU', this.canvas.width / 4, 110);
-    this.ctx.fillText('AI', 3 * this.canvas.width / 4, 110);
+    this.ctx.textAlign = 'center';
+    const label1 = this.gameMode === 'local' ? 'P1' : 'YOU';
+    const label2 = this.gameMode === 'local' ? 'P2' : 'AI';
+    this.ctx.fillText(label1, this.canvas.width / 4, 110);
+    this.ctx.fillText(label2, 3 * this.canvas.width / 4, 110);
 
-    // AI Level indicator
-    this.ctx.font = '14px "Comic Sans MS", cursive';
-    this.ctx.fillStyle = '#90A4AE';
-    this.ctx.fillText(`AI Level: ${AI_LEVELS[this.aiLevel].name}`, this.canvas.width / 2, this.canvas.height - 15);
+    // Controls hint for local multiplayer
+    if (this.gameMode === 'local') {
+      this.ctx.font = '12px Arial';
+      this.ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      this.ctx.textAlign = 'left';
+      this.ctx.fillText('P1: W/S', 10, this.canvas.height - 10);
+      this.ctx.textAlign = 'right';
+      this.ctx.fillText('P2: I/K', this.canvas.width - 10, this.canvas.height - 10);
+    } else {
+      // AI Level indicator
+      this.ctx.font = '14px "Comic Sans MS", cursive';
+      this.ctx.fillStyle = '#90A4AE';
+      this.ctx.textAlign = 'center';
+      this.ctx.fillText(`AI Level: ${AI_LEVELS[this.aiLevel].name}`, this.canvas.width / 2, this.canvas.height - 15);
+    }
 
     // Paused overlay
     if (this.isPaused) {

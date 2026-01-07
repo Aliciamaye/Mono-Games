@@ -1,0 +1,684 @@
+/* Theme Background Animations and Styles */
+
+.theme-background-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: all;
+}
+
+.theme-bg {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: all 0.5s ease;
+}
+
+/* ============================================
+   DARK THEME - Night Sky with Stars
+   ============================================ */
+.theme-dark {
+  background: linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 40%, #16213e 100%);
+}
+
+.starfield {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle 3s infinite;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.5); }
+}
+
+.shooting-stars {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.shooting-star {
+  position: absolute;
+  right: -100px;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1), 0 0 0 8px rgba(255, 255, 255, 0.1);
+  animation: shoot 2s ease-in infinite;
+}
+
+@keyframes shoot {
+  0% {
+    transform: translateX(0) translateY(0) rotate(-45deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-1000px) translateY(1000px) rotate(-45deg);
+    opacity: 0;
+  }
+}
+
+.night-clouds {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.night-cloud {
+  position: absolute;
+  width: 200px;
+  opacity: 0.4;
+  animation: driftNight 60s linear infinite;
+}
+
+.night-cloud-1 { top: 10%; animation-duration: 50s; }
+.night-cloud-2 { top: 30%; animation-duration: 70s; }
+.night-cloud-3 { top: 50%; animation-duration: 60s; }
+.night-cloud-4 { top: 70%; animation-duration: 55s; }
+
+@keyframes driftNight {
+  0% { transform: translateX(-220px); }
+  100% { transform: translateX(calc(100vw + 220px)); }
+}
+
+.moon {
+  position: absolute;
+  top: 10%;
+  right: 15%;
+  width: 100px;
+  height: 100px;
+  cursor: pointer;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  filter: drop-shadow(0 0 20px rgba(255, 255, 200, 0.5));
+  animation: moonFloat 6s ease-in-out infinite;
+}
+
+.moon:hover {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 30px rgba(255, 255, 200, 0.8));
+}
+
+.moon-active {
+  animation: moonSpin 2s linear, moonFloat 6s ease-in-out infinite !important;
+}
+
+@keyframes moonFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes moonSpin {
+  from { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.3); }
+  to { transform: rotate(360deg) scale(1); }
+}
+
+.moon-message {
+  position: absolute;
+  top: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.95);
+  color: #1a1a2e;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: bold;
+  white-space: nowrap;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  animation: bounceIn 0.5s ease;
+}
+
+@keyframes bounceIn {
+  0% { transform: translateX(-50%) scale(0); }
+  50% { transform: translateX(-50%) scale(1.1); }
+  100% { transform: translateX(-50%) scale(1); }
+}
+
+.aurora {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  opacity: 0.3;
+}
+
+.aurora-line {
+  position: absolute;
+  width: 100%;
+  height: 200px;
+  filter: blur(40px);
+  animation: auroraWave 15s ease-in-out infinite;
+}
+
+.aurora-1 {
+  background: linear-gradient(90deg, transparent, #4ECDC4, transparent);
+  top: 10%;
+  animation-delay: 0s;
+}
+
+.aurora-2 {
+  background: linear-gradient(90deg, transparent, #7B2CBF, transparent);
+  top: 25%;
+  animation-delay: 5s;
+}
+
+.aurora-3 {
+  background: linear-gradient(90deg, transparent, #95E1D3, transparent);
+  top: 40%;
+  animation-delay: 10s;
+}
+
+@keyframes auroraWave {
+  0%, 100% { transform: translateX(-50%) scaleY(1); opacity: 0.2; }
+  50% { transform: translateX(50%) scaleY(1.5); opacity: 0.4; }
+}
+
+/* ============================================
+   LIGHT THEME - Sunny Day
+   ============================================ */
+.theme-light {
+  background: linear-gradient(180deg, #87CEEB 0%, #B8E4F9 50%, #FFF8DC 100%);
+}
+
+.sun {
+  position: absolute;
+  top: 8%;
+  right: 10%;
+  width: 80px;
+  height: 80px;
+  cursor: pointer;
+  animation: sunRotate 20s linear infinite;
+  filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.6));
+  transition: transform 0.3s ease;
+}
+
+.sun:hover {
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 40px rgba(255, 215, 0, 0.8));
+}
+
+@keyframes sunRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.sun-message {
+  position: absolute;
+  top: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 215, 0, 0.95);
+  color: #333;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: bold;
+  white-space: nowrap;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  animation: bounceIn 0.5s ease;
+}
+
+.birds {
+  position: absolute;
+  width: 100%;
+  height: 50%;
+}
+
+.bird {
+  position: absolute;
+  animation: flyBird 20s linear infinite;
+}
+
+@keyframes flyBird {
+  0% { 
+    left: -50px; 
+    transform: translateY(0);
+  }
+  50% { 
+    transform: translateY(-20px);
+  }
+  100% { 
+    left: calc(100% + 50px); 
+    transform: translateY(0);
+  }
+}
+
+.day-clouds {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.day-cloud {
+  position: absolute;
+  width: 180px;
+  opacity: 0.8;
+  animation: driftDay 50s linear infinite;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.day-cloud:hover {
+  transform: scale(1.1);
+}
+
+.day-cloud-1 { top: 15%; animation-duration: 45s; }
+.day-cloud-2 { top: 25%; animation-duration: 60s; }
+.day-cloud-3 { top: 40%; animation-duration: 50s; }
+.day-cloud-4 { top: 60%; animation-duration: 55s; }
+.day-cloud-5 { top: 75%; animation-duration: 65s; }
+
+@keyframes driftDay {
+  0% { transform: translateX(-200px); }
+  100% { transform: translateX(calc(100vw + 200px)); }
+}
+
+/* ============================================
+   OCEAN THEME - Underwater Paradise
+   ============================================ */
+.theme-ocean {
+  background: linear-gradient(180deg, #E8F6F3 0%, #7EDDD6 50%, #4ECDC4 100%);
+}
+
+.ocean-waves {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 150px;
+}
+
+.wave {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  animation: waveMotion 8s ease-in-out infinite;
+}
+
+.wave-1 { animation-delay: 0s; }
+.wave-2 { animation-delay: -2s; }
+.wave-3 { animation-delay: -4s; }
+
+@keyframes waveMotion {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-5%); }
+}
+
+.fish-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.fish {
+  position: absolute;
+  cursor: pointer;
+  animation: swimFish 15s linear infinite;
+  transition: transform 0.3s ease;
+}
+
+.fish:hover {
+  transform: scale(1.3);
+}
+
+@keyframes swimFish {
+  0% { 
+    left: -50px; 
+    transform: scaleX(1) translateY(0);
+  }
+  48% { 
+    transform: scaleX(1) translateY(-30px);
+  }
+  50% {
+    left: calc(100% + 50px);
+    transform: scaleX(1) translateY(-30px);
+  }
+  51% {
+    left: calc(100% + 50px);
+    transform: scaleX(-1) translateY(-30px);
+  }
+  98% { 
+    transform: scaleX(-1) translateY(30px);
+  }
+  100% { 
+    left: -50px; 
+    transform: scaleX(-1) translateY(30px);
+  }
+}
+
+.bubbles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.bubble {
+  position: absolute;
+  bottom: -50px;
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
+  border-radius: 50%;
+  animation: riseBubble 8s linear infinite;
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+@keyframes riseBubble {
+  0% {
+    bottom: -50px;
+    opacity: 0.8;
+    transform: translateX(0) scale(1);
+  }
+  50% {
+    transform: translateX(50px) scale(1.1);
+  }
+  100% {
+    bottom: 110%;
+    opacity: 0;
+    transform: translateX(-50px) scale(0.5);
+  }
+}
+
+/* ============================================
+   SUNSET THEME - Twilight Magic
+   ============================================ */
+.theme-sunset {
+  background: linear-gradient(180deg, #FF6B35 0%, #F7931E 30%, #FFB347 60%, #E63946 100%);
+}
+
+.sunset-sky {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at center bottom, rgba(255, 107, 53, 0.6), transparent 70%);
+}
+
+.mountains {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 40%;
+}
+
+.mountain-layer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.fireflies {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.firefly {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #FFD93D;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #FFD93D, 0 0 20px #FFD93D;
+  animation: fireflyGlow 3s ease-in-out infinite;
+  cursor: pointer;
+}
+
+.firefly:hover {
+  animation: fireflyBurst 0.5s ease-out;
+  transform: scale(2);
+}
+
+@keyframes fireflyGlow {
+  0%, 100% { opacity: 0.3; transform: translateY(0) translateX(0); }
+  50% { opacity: 1; transform: translateY(-20px) translateX(20px); }
+}
+
+@keyframes fireflyBurst {
+  0% { transform: scale(1); box-shadow: 0 0 10px #FFD93D; }
+  50% { transform: scale(3); box-shadow: 0 0 40px #FFD93D, 0 0 60px #FFD93D; }
+  100% { transform: scale(2); box-shadow: 0 0 20px #FFD93D, 0 0 30px #FFD93D; }
+}
+
+/* ============================================
+   FOREST THEME - Enchanted Woods
+   ============================================ */
+.theme-forest {
+  background: linear-gradient(180deg, #95E1D3 0%, #52B788 50%, #2D6A4F 100%);
+}
+
+.trees {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 60%;
+}
+
+.tree {
+  position: absolute;
+  bottom: 0;
+  width: 100px;
+  animation: treeSwaygentle 4s ease-in-out infinite;
+}
+
+@keyframes treeSway {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(2deg); }
+}
+
+.butterflies {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.butterfly {
+  position: absolute;
+  animation: butterflyFly 8s ease-in-out infinite;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.butterfly:hover {
+  animation-play-state: paused;
+  transform: scale(1.5);
+}
+
+@keyframes butterflyFly {
+  0%, 100% { 
+    transform: translate(0, 0) rotate(0deg); 
+  }
+  25% { 
+    transform: translate(50px, -30px) rotate(10deg); 
+  }
+  50% { 
+    transform: translate(100px, 20px) rotate(-10deg); 
+  }
+  75% { 
+    transform: translate(50px, 30px) rotate(5deg); 
+  }
+}
+
+.leaves {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.leaf {
+  position: absolute;
+  top: -20px;
+  font-size: 2rem;
+  animation: fallLeaf 8s linear infinite;
+}
+
+@keyframes fallLeaf {
+  0% {
+    top: -20px;
+    transform: rotate(0deg) translateX(0);
+  }
+  50% {
+    transform: rotate(180deg) translateX(50px);
+  }
+  100% {
+    top: 110%;
+    transform: rotate(360deg) translateX(0);
+  }
+}
+
+/* ============================================
+   PURPLE THEME - Cosmic Dreams
+   ============================================ */
+.theme-purple {
+  background: linear-gradient(180deg, #240046 0%, #5A189A 50%, #9D4EDD 100%);
+}
+
+.nebula {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.nebula-cloud {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: nebulaPulse 10s ease-in-out infinite;
+}
+
+.nebula-1 {
+  width: 400px;
+  height: 400px;
+  top: 10%;
+  left: 10%;
+  background: radial-gradient(circle, #7B2CBF 0%, transparent 70%);
+  animation-delay: 0s;
+}
+
+.nebula-2 {
+  width: 500px;
+  height: 500px;
+  top: 40%;
+  right: 10%;
+  background: radial-gradient(circle, #C77DFF 0%, transparent 70%);
+  animation-delay: 3s;
+}
+
+.nebula-3 {
+  width: 350px;
+  height: 350px;
+  bottom: 10%;
+  left: 40%;
+  background: radial-gradient(circle, #E0AAFF 0%, transparent 70%);
+  animation-delay: 6s;
+}
+
+@keyframes nebulaPulse {
+  0%, 100% { 
+    transform: scale(1) translateY(0); 
+    opacity: 0.3; 
+  }
+  50% { 
+    transform: scale(1.2) translateY(-20px); 
+    opacity: 0.5; 
+  }
+}
+
+.cosmic-stars {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.cosmic-star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  animation: cosmicTwinkle 4s infinite;
+}
+
+@keyframes cosmicTwinkle {
+  0%, 100% { 
+    opacity: 0.2; 
+    box-shadow: 0 0 2px white; 
+  }
+  50% { 
+    opacity: 1; 
+    box-shadow: 0 0 6px white, 0 0 12px #C77DFF; 
+  }
+}
+
+.crystals {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.crystal {
+  position: absolute;
+  cursor: pointer;
+  animation: crystalFloat 4s ease-in-out infinite;
+  transition: transform 0.3s ease;
+  filter: drop-shadow(0 0 10px #9D4EDD);
+}
+
+.crystal:hover {
+  transform: scale(1.5) rotate(20deg);
+  filter: drop-shadow(0 0 20px #C77DFF);
+}
+
+@keyframes crystalFloat {
+  0%, 100% { 
+    transform: translateY(0) rotate(0deg); 
+  }
+  50% { 
+    transform: translateY(-30px) rotate(10deg); 
+  }
+}
+
+/* ============================================
+   GENERAL THEME UTILITIES
+   ============================================ */
+.theme-bg * {
+  pointer-events: auto;
+}
+
+/* Ensure content is above background */
+body > :not(.theme-background-wrapper) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Smooth transitions between themes */
+.theme-bg > * {
+  transition: opacity 0.5s ease;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .star { width: 1px; height: 1px; }
+  .bird, .fish, .butterfly { display: none; }
+  .firefly { width: 4px; height: 4px; }
+  .nebula-cloud { filter: blur(40px); }
+}

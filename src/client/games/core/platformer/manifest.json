@@ -1,0 +1,13 @@
+{
+  "id": "platformer",
+  "name": "Platformer",
+  "version": "1.0.0",
+  "description": "Classic side-scrolling platformer with coins and enemies",
+  "category": "platformer",
+  "difficulty": "easy",
+  "controls": {
+    "Arrow Keys / WASD": "Move",
+    "Space / W / Up": "Jump"
+  },
+  "features": ["Multiple Levels", "Collectibles", "Enemies", "Score System"]
+}

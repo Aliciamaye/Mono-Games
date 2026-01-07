@@ -1,0 +1,14 @@
+{
+  "id": "space-shooter",
+  "name": "Space Shooter",
+  "version": "1.0.0",
+  "description": "Classic arcade space shooter with waves of enemies",
+  "category": "arcade",
+  "difficulty": "medium",
+  "controls": {
+    "A/Left Arrow": "Move left",
+    "D/Right Arrow": "Move right",
+    "Space": "Shoot"
+  },
+  "features": ["Waves", "Power-ups", "Particle Effects", "Boss Fights"]
+}

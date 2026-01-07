@@ -1,10 +1,10 @@
-import axios from 'axios';
+import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import { signRequest, generateCSRFToken, isRateLimited } from '../utils/security';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // Create axios instance
-const api = axios.create({
+const api: AxiosInstance = axios.create({
   baseURL: API_URL,
   timeout: 30000,
   headers: {
@@ -14,9 +14,9 @@ const api = axios.create({
 
 // Request interceptor
 api.interceptors.request.use(
-  (config) => {
+  (config: InternalAxiosRequestConfig) => {
     // Check rate limiting
-    if (isRateLimited(config.url)) {
+    if (isRateLimited(config.url || '')) {
       return Promise.reject(new Error('Too many requests. Please try again later.'));
     }
 
@@ -32,8 +32,8 @@ api.interceptors.request.use(
 
     // Sign request
     const { signature, timestamp, nonce } = signRequest(
-      config.method.toUpperCase(),
-      config.url,
+      (config.method || 'GET').toUpperCase(),
+      config.url || '',
       config.data
     );
     
@@ -43,7 +43,7 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error) => {
+  (error: any) => {
     return Promise.reject(error);
   }
 );
@@ -118,8 +118,13 @@ export const apiService = {
   deleteSave: (gameId) => api.delete(`/saves/${gameId}`)
 };
 
+// Extend AxiosInstance to add setAuthToken method
+interface ExtendedAxiosInstance extends AxiosInstance {
+  setAuthToken: (token: string | null) => void;
+}
+
 // Helper method to set auth token
-api.setAuthToken = (token) => {
+(api as ExtendedAxiosInstance).setAuthToken = (token: string | null) => {
   if (token) {
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     localStorage.setItem('token', token);
@@ -129,4 +134,4 @@ api.setAuthToken = (token) => {
   }
 };
 
-export default api;
+export default api as ExtendedAxiosInstance;

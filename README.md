@@ -50,25 +50,23 @@
 
 ---
 
-## 🎮 Available Games
+## 🎮 Available Games (Playables)
 
-| Game | Genre | Status | Features |
-|------|-------|--------|----------|
-| 🐍 **Snake** | Arcade | ✅ Complete | Classic gameplay, power-ups |
-| 🔢 **2048** | Puzzle | ✅ Complete | Tile merging, high scores |
-| 🧱 **Tetris** | Arcade | ✅ Complete | Line clearing, levels |
-| 🏓 **Pong** | Sports | ✅ Complete | AI opponent, scoring |
-| 🃏 **Memory Match** | Puzzle | ✅ Complete | Card matching, timer |
-| 🏎️ **Turbo Racer** | Racing | ✅ Complete | Power-ups, obstacles, drifting |
-| 🎯 **Breakout** | Arcade | 🔄 In Progress | Brick breaking, power-ups |
-| 👾 **Space Invaders** | Shooter | 🔄 In Progress | Alien waves, boss battles |
-| 🐦 **Flappy Bird** | Arcade | 🔄 In Progress | Tap-to-fly, high scores |
-| ⌨️ **Typing Test** | Educational | 📅 Planned | WPM tracking, accuracy |
-| ❌ **Tic-Tac-Toe** | Strategy | 📅 Planned | AI opponent |
-| 🔴 **Connect Four** | Strategy | 📅 Planned | Gravity physics, AI |
-| 💣 **Minesweeper** | Puzzle | 📅 Planned | Classic mine detection |
-| 🔢 **Sudoku** | Puzzle | 📅 Planned | Puzzle generation, hints |
-| ♟️ **Chess** | Strategy | 📅 Planned | Full rules, AI opponent |
+| Game | Genre | Status | Notes |
+|------|-------|--------|-------|
+| 🐍 **Snake** | Arcade | ✅ Playable | Classic grid snake |
+| 🧱 **Tetris** | Arcade | ✅ Playable | Line clear + levels |
+| 🔢 **2048** | Puzzle | ✅ Playable | Merge tiles, score chase |
+| 🏓 **Pong** | Sports | ✅ Playable | AI opponent |
+| ❌ **Tic-Tac-Toe** | Strategy | ✅ Playable | Local/AI modes |
+| 🔴 **Connect Four** | Strategy | ✅ Playable | Gravity grid |
+| 🃏 **Memory Match** | Puzzle | ✅ Playable | Card matching |
+| 🏎️ **Racing** | Racing | ✅ Playable | Endless lanes |
+| 🧱 **Breakout** | Arcade | ✅ Playable | Brick breaker |
+| 🌌 **Infinite Roads** | Racing | ✅ Playable | 3D driving |
+| 🚀 **Space Shooter** | Shooter | ✅ Playable | Wave shooter |
+| 🧗 **Platformer** | Platform | ✅ Playable | Side scroller |
+| 🧊 **Cube Runner** | Arcade | ✅ Playable | 3D obstacle dodge |
 
 ---
 

@@ -1,5 +1,5 @@
 import BaseGame from '../../shared/framework/BaseGame.js';
-import audioManager, { Sounds } from '../../../utils/audioManager.js';
+import audioManager, { Sounds } from '../../../utils/audioManager.ts';
 
 export default class RacingGame extends BaseGame {
   constructor(containerId) {

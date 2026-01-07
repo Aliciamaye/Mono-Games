@@ -1,4 +1,4 @@
-import BaseGame from '../BaseGame';
+import BaseGame from '../../shared/framework/BaseGame.js';
 import audioManager, { Sounds } from '../../../utils/audioManager';
 
 export default class Breakout extends BaseGame {

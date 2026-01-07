@@ -65,7 +65,19 @@ function Settings() {
   };
 
   const handleToggle = (category, key) => {
-    updateSetting(category, key, !settings[category][key]);
+    const newValue = !settings[category][key];
+    updateSetting(category, key, newValue);
+    
+    // Handle fullscreen toggle
+    if (category === 'display' && key === 'fullscreen') {
+      if (newValue) {
+        document.documentElement.requestFullscreen?.();
+      } else {
+        if (document.fullscreenElement) {
+          document.exitFullscreen?.();
+        }
+      }
+    }
   };
 
   const handleSelect = (category, key, value) => {

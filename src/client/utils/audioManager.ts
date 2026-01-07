@@ -3,14 +3,48 @@
  * Supports background music, sound effects, volume control, and audio preloading
  */
 
+// Import settings store
+let settingsStore = null;
+
 class AudioManager {
   constructor() {
     this.sounds = new Map();
     this.music = null;
     this.musicVolume = 0.5;
     this.sfxVolume = 0.7;
+    this.masterVolume = 0.7;
     this.muted = false;
     this.initialized = false;
+
+    // Subscribe to settings after module loads
+    this.subscribeToSettings();
+  }
+
+  subscribeToSettings() {
+    // Dynamic import to avoid circular dependencies
+    import('../store/settingsStore.js').then((module) => {
+      settingsStore = module.default;
+      const settings = settingsStore.getState().settings.audio;
+      
+      this.masterVolume = settings.masterVolume / 100;
+      this.musicVolume = settings.musicVolume / 100;
+      this.sfxVolume = settings.sfxVolume / 100;
+      this.muted = settings.muted;
+
+      // Subscribe to future changes
+      settingsStore.subscribe((state) => {
+        const audio = state.settings.audio;
+        this.masterVolume = audio.masterVolume / 100;
+        this.musicVolume = audio.musicVolume / 100;
+        this.sfxVolume = audio.sfxVolume / 100;
+        this.muted = audio.muted;
+        
+        if (this.music) {
+          this.music.volume = this.musicVolume * this.masterVolume;
+          this.music.muted = this.muted;
+        }
+      });
+    });
   }
 
   /**
@@ -67,9 +101,10 @@ class AudioManager {
 
     try {
       const clone = sound.cloneNode();
-      clone.volume = this.sfxVolume * volume;
+      clone.volume = this.sfxVolume * volume * this.masterVolume;
       clone.loop = loop;
       clone.playbackRate = playbackRate;
+      clone.muted = this.muted;
       clone.play().catch(e => console.warn('Play failed:', e));
       
       return clone; // Return for manual control if needed
@@ -93,7 +128,8 @@ class AudioManager {
     try {
       this.music = new Audio(url);
       this.music.loop = loop;
-      this.music.volume = fadeIn ? 0 : this.musicVolume * volume;
+      this.music.volume = fadeIn ? 0 : this.musicVolume * volume * this.masterVolume;
+      this.music.muted = this.muted;
       
       await this.music.play();
 

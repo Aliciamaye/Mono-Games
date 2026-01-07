@@ -1,0 +1,14 @@
+{
+  "id": "cube-runner",
+  "name": "Cube Runner",
+  "version": "1.0.0",
+  "description": "Fast-paced 3D obstacle avoidance game",
+  "category": "3d",
+  "difficulty": "hard",
+  "renderer": "three",
+  "controls": {
+    "A/Left Arrow": "Move left",
+    "D/Right Arrow": "Move right"
+  },
+  "features": ["3D Graphics", "Increasing Difficulty", "Pickups", "High Score"]
+}

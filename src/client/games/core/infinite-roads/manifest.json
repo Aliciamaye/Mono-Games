@@ -1,0 +1,29 @@
+{
+  "id": "infinite-roads",
+  "name": "Infinite Roads",
+  "description": "A relaxing endless driving experience through beautiful procedurally generated landscapes. Inspired by slowroads.io but enhanced with dynamic weather, time of day changes, and more scenery.",
+  "version": "1.0.0",
+  "category": "simulation",
+  "renderer": "three",
+  "multiplayer": false,
+  "controls": {
+    "keyboard": {
+      "W/↑": "Accelerate",
+      "S/↓": "Brake/Reverse",
+      "A/←": "Steer Left",
+      "D/→": "Steer Right",
+      "Space": "Pause"
+    }
+  },
+  "features": [
+    "3D Graphics with Three.js",
+    "Infinite procedural generation",
+    "Dynamic time of day",
+    "Weather effects",
+    "Smooth controls",
+    "Relaxing gameplay"
+  ],
+  "rating": 5.0,
+  "size": "8.5MB",
+  "difficulty": "easy"
+}
