@@ -1,25 +1,22 @@
-# Mono Games
+# 🎮 Mono Games
 
-<div align="center">
+**PRIVATE DEVELOPMENT PROJECT**
 
-![Mono Games Logo](./docs/assets/logo.png)
-
-**🎮 The Ultimate Cross-Platform Gaming Platform 🎮**
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Platform: Windows](https://img.shields.io/badge/Platform-Windows-blue.svg)]()
-[![Platform: Android](https://img.shields.io/badge/Platform-Android-green.svg)]()
-[![Platform: Web](https://img.shields.io/badge/Platform-Web-orange.svg)]()
-
-*50+ games in one platform • Offline & Online • Secure & Fast*
-
-[🎮 Play Now](https://mono-games.vercel.app) • [📥 Download Desktop](https://github.com/Aliciamaye/Mono-Games/releases) • [📱 Download Android](https://github.com/Aliciamaye/Mono-Games/releases) • [📚 Documentation](./docs)
-
-</div>
+A cross-platform gaming platform with multiple games and features.
 
 ---
 
-## 🌟 Features
+## ⚠️ Important Notice
+
+This is a **PRIVATE repository**. Access is restricted to authorized developers only.
+
+- 🔒 **Proprietary License** - All Rights Reserved
+- ⛔ **No Public Distribution** - Internal development only
+- 🚫 **No Copying** - Unauthorized use is prohibited
+
+---
+
+## 🎮 Features
 
 ### 🎯 **50+ Games**
 - **15 Pre-installed Core Games** - Ready to play instantly
