@@ -295,107 +295,107 @@ export default class InfiniteRoads {
   }
 
   private initializeCarModels(): void {
-    // 10+ DETAILED car models with unique properties
+    // 10+ DETAILED car models with unique properties and realistic stats
     this.availableCars = [
       {
         name: 'Classic Sedan',
         type: 'sedan',
         maxSpeed: 160,
-        acceleration: 3.0,
-        handling: 0.7,
+        acceleration: 3.5,
+        handling: 0.75,
         weight: 1400,
-        color: new BABYLON.Color3(0.8, 0.1, 0.1),
-        description: 'Reliable daily driver'
+        color: new BABYLON.Color3(0.9, 0.2, 0.2),
+        description: 'Reliable daily driver with balanced performance'
       },
       {
         name: 'Muscle Sports',
         type: 'sports',
-        maxSpeed: 280,
-        acceleration: 8.0,
-        handling: 0.85,
+        maxSpeed: 300,
+        acceleration: 9.0,
+        handling: 0.88,
         weight: 1200,
-        color: new BABYLON.Color3(1.0, 0.8, 0.0),
-        description: 'Fast and furious'
+        color: new BABYLON.Color3(1.0, 0.85, 0.0),
+        description: 'Lightning fast with razor-sharp handling'
       },
       {
         name: 'Off-Road SUV',
         type: 'suv',
-        maxSpeed: 140,
-        acceleration: 2.5,
-        handling: 0.6,
+        maxSpeed: 150,
+        acceleration: 3.0,
+        handling: 0.65,
         weight: 2000,
-        color: new BABYLON.Color3(0.2, 0.5, 0.2),
-        description: 'Rugged adventure vehicle'
+        color: new BABYLON.Color3(0.2, 0.6, 0.2),
+        description: 'Rugged adventure vehicle, conquers any terrain'
       },
       {
         name: 'Heavy Truck',
         type: 'truck',
-        maxSpeed: 120,
-        acceleration: 1.8,
-        handling: 0.5,
+        maxSpeed: 130,
+        acceleration: 2.2,
+        handling: 0.55,
         weight: 3000,
-        color: new BABYLON.Color3(0.3, 0.3, 0.3),
-        description: 'Powerful hauler'
+        color: new BABYLON.Color3(0.35, 0.35, 0.35),
+        description: 'Powerful hauler with massive presence'
       },
       {
         name: 'Speed Bike',
         type: 'bike',
-        maxSpeed: 220,
-        acceleration: 6.0,
-        handling: 0.95,
+        maxSpeed: 250,
+        acceleration: 7.5,
+        handling: 0.98,
         weight: 200,
-        color: new BABYLON.Color3(0.0, 0.0, 0.0),
-        description: 'Nimble two-wheeler'
+        color: new BABYLON.Color3(0.1, 0.1, 0.1),
+        description: 'Nimble two-wheeler, feels every curve'
       },
       {
         name: 'Family Van',
         type: 'van',
-        maxSpeed: 130,
-        acceleration: 2.0,
-        handling: 0.55,
+        maxSpeed: 140,
+        acceleration: 2.5,
+        handling: 0.60,
         weight: 1800,
-        color: new BABYLON.Color3(0.5, 0.5, 0.8),
-        description: 'Spacious transport'
+        color: new BABYLON.Color3(0.5, 0.5, 0.85),
+        description: 'Spacious transport for the whole crew'
       },
       {
         name: 'City Bus',
         type: 'bus',
-        maxSpeed: 100,
-        acceleration: 1.2,
-        handling: 0.4,
+        maxSpeed: 110,
+        acceleration: 1.5,
+        handling: 0.45,
         weight: 5000,
-        color: new BABYLON.Color3(0.9, 0.6, 0.1),
-        description: 'Public transport'
+        color: new BABYLON.Color3(0.95, 0.65, 0.15),
+        description: 'Public transport giant, steady and strong'
       },
       {
         name: 'Beach Convertible',
         type: 'convertible',
-        maxSpeed: 180,
-        acceleration: 4.5,
-        handling: 0.75,
+        maxSpeed: 190,
+        acceleration: 5.0,
+        handling: 0.80,
         weight: 1300,
-        color: new BABYLON.Color3(0.0, 0.6, 0.9),
-        description: 'Open-air cruiser'
+        color: new BABYLON.Color3(0.0, 0.7, 0.95),
+        description: 'Open-air cruiser, perfect for coastal drives'
       },
       {
         name: 'Rally Racer',
         type: 'rally',
-        maxSpeed: 240,
-        acceleration: 7.0,
-        handling: 0.9,
+        maxSpeed: 260,
+        acceleration: 8.0,
+        handling: 0.92,
         weight: 1100,
-        color: new BABYLON.Color3(0.9, 0.1, 0.1),
-        description: 'Off-road champion'
+        color: new BABYLON.Color3(0.95, 0.15, 0.15),
+        description: 'Off-road champion with rally pedigree'
       },
       {
         name: 'Electric Future',
         type: 'electric',
-        maxSpeed: 200,
-        acceleration: 9.5,
-        handling: 0.8,
+        maxSpeed: 220,
+        acceleration: 10.0,
+        handling: 0.85,
         weight: 1600,
-        color: new BABYLON.Color3(0.8, 0.8, 0.8),
-        description: 'Silent powerhouse'
+        color: new BABYLON.Color3(0.85, 0.85, 0.85),
+        description: 'Silent powerhouse with instant torque'
       }
     ];
   }
@@ -873,6 +873,20 @@ export default class InfiniteRoads {
     this.distanceTraveled = 0;
     this.currentSegmentIndex = 0;
     this.carPosition = 0;
+    this.currentTime = 14;
+    
+    // Clear existing road and scenery
+    this.roadSegments.forEach(s => s.mesh.dispose());
+    this.terrainChunks.forEach(t => t.mesh.dispose());
+    this.sceneryObjects.forEach(o => o.dispose());
+    
+    this.roadSegments = [];
+    this.terrainChunks = [];
+    this.sceneryObjects = [];
+    this.noiseOffset = 0;
+    
+    // Regenerate fresh road
+    this.generateInitialRoad();
   }
 
   // Required by GamePlay.tsx - cleanup
@@ -1121,40 +1135,7 @@ export default class InfiniteRoads {
     this.scene.render();
   }
 
-  pause(): void {
-    this.isPaused = true;
-  }
-
-  resume(): void {
-    this.isPaused = false;
-  }
-
-  restart(): void {
-    this.distanceTraveled = 0;
-    this.currentSegmentIndex = 0;
-    this.carSpeed = 0;
-    this.carPosition = 0;
-    this.currentTime = 14;
-    
-    this.roadSegments.forEach(s => s.mesh.dispose());
-    this.terrainChunks.forEach(t => t.mesh.dispose());
-    this.sceneryObjects.forEach(o => o.dispose());
-    
-    this.roadSegments = [];
-    this.terrainChunks = [];
-    this.sceneryObjects = [];
-    this.noiseOffset = 0;
-    
-    this.generateInitialRoad();
-  }
-
-  destroy(): void {
-    this.isRunning = false;
-    this.engine.stopRenderLoop();
-    this.scene.dispose();
-    this.engine.dispose();
-    this.canvas.remove();
-  }
+  // Removed duplicate pause/resume/destroy methods (already defined earlier)
 
   private cycleCameraView(): void {
     const views = [
