@@ -12,6 +12,8 @@ node_modules/
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+.npm/
+.node_repl_history
 
 # Testing
 coverage/
@@ -21,6 +23,8 @@ coverage/
 __tests__/
 test-results/
 playwright-report/
+*.test.log
+test-*.xml
 
 # Production builds
 dist/
@@ -34,6 +38,8 @@ out/
 *.bundle.js
 *.chunk.js
 *.map
+*.min.js
+*.min.css
 
 # Environment variables & Secrets (CRITICAL - NEVER COMMIT)
 .env
@@ -48,18 +54,70 @@ out/
 *.key
 *.pem
 *.cert
+*.crt
+*.p12
+*.pfx
 config/secrets.json
+config/production.json
 src/server/.env
+.env.backup
 
 # API Keys & Credentials (NEVER COMMIT THESE)
 **/api-keys.json
 **/credentials.json
 **/secrets.js
 **/secrets.json
+**/auth-config.js
+**/oauth-config.json
 supabase-key.txt
 jwt-secret.txt
 github-token.txt
 firebase-key.json
+firebase-adminsdk-*.json
+google-credentials.json
+aws-credentials.json
+**/token.json
+**/refresh-token.txt
+
+# ==========================================
+# SERVER-SIDE LOGIC (MONO-DATA REPO ONLY)
+# These files should NEVER be in Mono-Games
+# ==========================================
+
+# Server source code (belongs in Mono-Data repo)
+src/server/**/*.js
+src/server/**/*.ts
+!src/server/README.md
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.sql
+database/
+db/
+prisma/
+migrations/
+seeds/
+
+# User data & saves
+user-data/
+saves/
+player-data/
+user-*.json
+save-*.json
+
+# Cloud sync data
+sync-data/
+cloud-backup/
+*.sync
+.sync-cache/
+
+# Session & authentication data
+sessions/
+session-*.json
+auth-tokens/
+*.session
 
 # Logs
 logs/
@@ -70,6 +128,9 @@ yarn-error.log*
 lerna-debug.log*
 pnpm-debug.log*
 .turbo/
+combined.log
+error.log
+access.log
 
 # OS files
 .DS_Store
@@ -110,11 +171,31 @@ src/mobile/android/build/
 # Temporary files
 *.tmp
 *.temp
+*.swp
+*.swo
+*~
 .cache/
 .parcel-cache/
 .next/
 .nuxt/
 .vuepress/dist/
+.vite/
+.turbo/
+tmp/
+temp/
+.tmp/
+
+# Debug artifacts
+debug/
+*.debug
+.pnpm-store
+.debugging/
+debug.log
+verbose.log
+*.stackdump
+crash-reports/
+*.dmp
+heapdump-*.heapsnapshot
 
 # Package manager
 .npm
@@ -133,12 +214,35 @@ src/client/workbox-*.js
 # Build artifacts
 *.tgz
 *.zip
+*.tar.gz
+*.rar
+*.7z
 packaged-games/
+artifacts/
+.artifacts/
 
-# Debug
-.debugging/
-debug.log
-
-# Editor backups
+# Backup files
 *.bak
+*.backup
+*.old
 *.orig
+*~
+.backup/
+backups/
+
+# ==========================================
+# PUBLIC DISTRIBUTION (SAFE TO COMMIT)
+# What SHOULD be in Mono-Games repo:
+# ==========================================
+# - Client-side code (src/client/)
+# - Public assets (images, icons, fonts)
+# - Documentation (README, docs/)
+# - Build configurations (vite.config, etc.)
+# - Package manifests (package.json)
+# - License and contributing guides
+# 
+# What should NOT be here (belongs in Mono-Data):
+# - Server implementation
+# - Database schemas
+# - API secrets
+# - User data

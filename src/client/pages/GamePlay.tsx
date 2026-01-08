@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { loadGame } from '../services/gameStore';
+import achievementService from '../services/achievementService';
+import leaderboardService from '../services/leaderboardService';
 import { PlayIcon, PauseIcon, HomeIcon, GamepadIcon, RefreshIcon } from '../components/Icons';
 import type React from 'react';
 
@@ -35,7 +37,7 @@ const GamePlay: React.FC = () => {
       console.log('[GamePlay] Already initializing, skipping...');
       return;
     }
-    
+
     isInitializing.current = true;
     let mounted = true;
     let scoreInterval: NodeJS.Timeout | null = null;
@@ -64,7 +66,7 @@ const GamePlay: React.FC = () => {
         }
 
         console.log('[GamePlay] Container found, loading game class...');
-        
+
         // Load game class
         const GameClass = await loadGame(gameId);
         console.log('[GamePlay] Game class loaded');
@@ -80,16 +82,22 @@ const GamePlay: React.FC = () => {
         // Initialize game
         console.log('[GamePlay] Creating game instance...');
         const game = new GameClass('game-container');
-        
+
         console.log('[GamePlay] Initializing game...');
         game.init();
-        
+
         console.log('[GamePlay] Starting game...');
         game.start();
 
         gameInstanceRef.current = game;
         console.log('[GamePlay] ✅ Game ready!');
         setIsLoading(false);
+
+        // Check achievement for playing a game
+        achievementService.checkAchievements({
+          type: 'game_played',
+          gameId: gameId
+        });
 
         // Poll for score updates
         scoreInterval = setInterval(() => {

@@ -3,7 +3,10 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles/global.css';
 import './styles/cartoony-theme.css';
+import './styles/theme-variables.css';
 import './styles/auth.css';
+import './styles/auth-dark-mode.css';
+import './styles/achievements.css';
 
 // Register service worker for PWA
 if ('serviceWorker' in navigator && import.meta.env.PROD) {

@@ -1,0 +1,162 @@
+/* Theme-Specific CSS Variable Overrides */
+/* This file defines CSS variables for each theme to ensure consistency */
+
+/* Dark Theme */
+.theme-dark {
+    --primary: #FF6B35;
+    --secondary: #F7931E;
+    --accent: #4ECDC4;
+
+    --bg-main: #1A1A2E;
+    --bg-card: #252542;
+    --bg-pattern: #16213E;
+    --bg-gradient: linear-gradient(180deg, #1A1A2E 0%, #16213E 100%);
+
+    --text-primary: #FFFFFF;
+    --text-secondary: #B0B0B0;
+    --text-light: #FFFFFF;
+    --text-muted: #6B6B8C;
+
+    --border-color: #3D3D5C;
+    --shadow-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Ocean Theme */
+.theme-ocean {
+    --primary: #4ECDC4;
+    --secondary: #7EDDD6;
+    --accent: #95E1D3;
+
+    --bg-main: #E8F6F3;
+    --bg-card: #FFFFFF;
+    --bg-pattern: #B8E6E1;
+    --bg-gradient: linear-gradient(180deg, #E8F6F3 0%, #B8E6E1 100%);
+
+    --text-primary: #1A535C;
+    --text-secondary: #4ECDC4;
+    --text-light: #FFFFFF;
+    --text-muted: #6B9FA6;
+
+    --border-color: #4ECDC4;
+    --shadow-color: rgba(26, 83, 92, 0.15);
+}
+
+/* Sunset Theme */
+.theme-sunset {
+    --primary: #E63946;
+    --secondary: #F7931E;
+    --accent: #FFB347;
+
+    --bg-main: #FFF0F0;
+    --bg-card: #FFFFFF;
+    --bg-pattern: #FFD3B6;
+    --bg-gradient: linear-gradient(180deg, #FFD3B6 0%, #FFA5A5 100%);
+
+    --text-primary: #2C3E50;
+    --text-secondary: #E63946;
+    --text-light: #FFFFFF;
+    --text-muted: #A0656B;
+
+    --border-color: #FFB4A2;
+    --shadow-color: rgba(230, 57, 70, 0.15);
+}
+
+/* Forest Theme */
+.theme-forest {
+    --primary: #2D6A4F;
+    --secondary: #52B788;
+    --accent: #95D5B2;
+
+    --bg-main: #F0F7F4;
+    --bg-card: #FFFFFF;
+    --bg-pattern: #D8F3DC;
+    --bg-gradient: linear-gradient(180deg, #D8F3DC 0%, #B7E4C7 100%);
+
+    --text-primary: #1B4332;
+    --text-secondary: #52B788;
+    --text-light: #FFFFFF;
+    --text-muted: #6B9277;
+
+    --border-color: #95D5B2;
+    --shadow-color: rgba(45, 106, 79, 0.15);
+}
+
+/* Purple Theme */
+.theme-purple {
+    --primary: #7B2CBF;
+    --secondary: #9D4EDD;
+    --accent: #C77DFF;
+
+    --bg-main: #F5F0FF;
+    --bg-card: #FFFFFF;
+    --bg-pattern: #E0AAFF;
+    --bg-gradient: linear-gradient(180deg, #E0AAFF 0%, #C77DFF 100%);
+
+    --text-primary: #3C096C;
+    --text-secondary: #9D4EDD;
+    --text-light: #FFFFFF;
+    --text-muted: #8667A0;
+
+    --border-color: #C77DFF;
+    --shadow-color: rgba(123, 44, 191, 0.15);
+}
+
+/* Retro Theme */
+.theme-retro {
+    --primary: #00FF00;
+    --secondary: #00AA00;
+    --accent: #00FF88;
+
+    --bg-main: #0A0A0A;
+    --bg-card: #1A1A1A;
+    --bg-pattern: #0F0F0F;
+    --bg-gradient: linear-gradient(180deg, #0A0A0A 0%, #1A1A1A 100%);
+
+    --text-primary: #00FF00;
+    --text-secondary: #00AA00;
+    --text-light: #00FF00;
+    --text-muted: #008800;
+
+    --border-color: #00FF00;
+    --shadow-color: rgba(0, 255, 0, 0.2);
+}
+
+/* Neon Theme */
+.theme-neon {
+    --primary: #FF00FF;
+    --secondary: #7209B7;
+    --accent: #00FFF5;
+
+    --bg-main: #0D0221;
+    --bg-card: #1A0B2E;
+    --bg-pattern: #3A0CA3;
+    --bg-gradient: linear-gradient(180deg, #0D0221 0%, #3A0CA3 100%);
+
+    --text-primary: #00FFF5;
+    --text-secondary: #FF00FF;
+    --text-light: #00FFF5;
+    --text-muted: #9D00FF;
+
+    --border-color: #7209B7;
+    --shadow-color: rgba(255, 0, 255, 0.3);
+}
+
+/* Light Theme (override defaults if needed) */
+.theme-light {
+    --primary: #FF6B35;
+    --secondary: #F7931E;
+    --accent: #4ECDC4;
+
+    --bg-main: #FFF8DC;
+    --bg-card: #FFFFFF;
+    --bg-pattern: #FFE5B4;
+    --bg-gradient: linear-gradient(180deg, #87CEEB 0%, #FFE5B4 100%);
+
+    --text-primary: #2C3E50;
+    --text-secondary: #546E7A;
+    --text-light: #FFFFFF;
+    --text-muted: #90A4AE;
+
+    --border-color: #FFB347;
+    --shadow-color: rgba(44, 62, 80, 0.15);
+}
