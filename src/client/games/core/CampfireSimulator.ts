@@ -324,8 +324,24 @@ export default class CampfireSimulator {
     this.info.fireStrength = Math.round(this.fireIntensity);
   }
 
+  // Required by GamePlay.tsx
+  init(): void {
+    console.log('[CampfireSimulator] Initializing...');
+    this.isRunning = true;
+  }
+
+  start(): void {
+    console.log('[CampfireSimulator] Starting...');
+    this.isRunning = true;
+  }
+
   pause(): void {}
   resume(): void {}
+  
+  reset(): void {
+    this.restart();
+  }
+
   restart(): void {
     this.fireIntensity = 100;
     this.info.logsAdded = 0;
@@ -334,6 +350,13 @@ export default class CampfireSimulator {
     this.marshmallows.forEach(m => m.dispose());
     this.marshmallows = [];
   }
+
+  destroy(): void {
+    this.isRunning = false;
+    this.engine.stopRenderLoop();
+    this.cleanup();
+  }
+
   cleanup(): void {
     this.scene.dispose();
     this.engine.dispose();

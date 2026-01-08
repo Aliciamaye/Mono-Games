@@ -844,6 +844,45 @@ export default class InfiniteRoads {
     });
   }
 
+  // Required by GamePlay.tsx - initialize game
+  init(): void {
+    console.log('[InfiniteRoads] Initializing...');
+    this.setup();
+  }
+
+  // Required by GamePlay.tsx - start game
+  start(): void {
+    console.log('[InfiniteRoads] Starting...');
+    this.isRunning = true;
+    this.isPaused = false;
+  }
+
+  // Required by GamePlay.tsx - pause game
+  pause(): void {
+    this.isPaused = true;
+  }
+
+  // Required by GamePlay.tsx - resume game
+  resume(): void {
+    this.isPaused = false;
+  }
+
+  // Required by GamePlay.tsx - reset game
+  reset(): void {
+    this.carSpeed = 0;
+    this.distanceTraveled = 0;
+    this.currentSegmentIndex = 0;
+    this.carPosition = 0;
+  }
+
+  // Required by GamePlay.tsx - cleanup
+  destroy(): void {
+    this.isRunning = false;
+    this.engine.stopRenderLoop();
+    this.scene.dispose();
+    this.engine.dispose();
+  }
+
   update(deltaTime: number): void {
     const dt = deltaTime / 1000;
     const currentCar = this.availableCars[this.currentCarIndex];

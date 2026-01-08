@@ -241,14 +241,37 @@ export default class SpaceExplorer {
     this.info.speed = Math.round(this.shipSpeed);
   }
 
+  // Required by GamePlay.tsx
+  init(): void {
+    console.log('[SpaceExplorer] Initializing...');
+    this.isRunning = true;
+  }
+
+  start(): void {
+    console.log('[SpaceExplorer] Starting...');
+    this.isRunning = true;
+  }
+
   pause(): void {}
   resume(): void {}
+  
+  reset(): void {
+    this.restart();
+  }
+
   restart(): void {
     this.ship.position = new BABYLON.Vector3(0, 0, -5);
     this.shipSpeed = 0;
     this.info.planetsDiscovered = 0;
     this.info.distanceTraveled = 0;
   }
+
+  destroy(): void {
+    this.isRunning = false;
+    this.engine.stopRenderLoop();
+    this.cleanup();
+  }
+
   cleanup(): void {
     this.scene.dispose();
     this.engine.dispose();

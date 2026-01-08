@@ -787,12 +787,35 @@ export default class ZenGarden {
     this.scene.render();
   }
 
+  // Required by GamePlay.tsx
+  init(): void {
+    console.log('[ZenGarden] Initializing...');
+    this.isRunning = true;
+  }
+
+  start(): void {
+    console.log('[ZenGarden] Starting...');
+    this.isRunning = true;
+    this.isPaused = false;
+  }
+
   pause(): void {
     this.isPaused = true;
   }
 
   resume(): void {
     this.isPaused = false;
+  }
+
+  reset(): void {
+    this.restart();
+  }
+
+  destroy(): void {
+    this.isRunning = false;
+    this.engine.stopRenderLoop();
+    this.scene.dispose();
+    this.engine.dispose();
   }
 
   restart(): void {

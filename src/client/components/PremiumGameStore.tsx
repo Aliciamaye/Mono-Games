@@ -149,24 +149,25 @@ function PremiumGameStore() {
                 }}>
                     ⭐⭐⭐ Tier 3 - Premium 3D Games (Only 150 💎!)
                 </h3>
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                gap: '1.5rem'
-            }}>
-                {groupedGames.tier3.map(game => (
-                    <GameCard
-                        key={game.id}
-                        game={game}
-                        diamonds={diamonds}
-                        isUnlocked={unlockedGames.includes(game.id)}
-                        onUnlock={() => handleUnlock(game.id)}
-                    />
-                ))}
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                    gap: '1.5rem'
+                }}>
+                    {groupedGames.tier3.map(game => (
+                        <GameCard
+                            key={game.id}
+                            game={game}
+                            diamonds={diamonds}
+                            isUnlocked={unlockedGames.includes(game.id)}
+                            onUnlock={() => handleUnlock(game.id)}
+                        />
+                    ))}
+                </div>
             </div>
         </div>
     );
-};
+}
 
 // Game Card Component
 const GameCard: React.FC<{

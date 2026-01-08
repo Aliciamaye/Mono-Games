@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import { useEffect, useState, lazy } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import useSettingsStore from './store/settingsStore';
 import useAuthStore from './store/authStore';
 import audioManager, { MusicTracks } from './utils/audioManager';
@@ -175,19 +175,32 @@ const AppContent: React.FC = () => {
       <FPSCounter />
       <SyncStatusIndicator />
       <Layout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/launcher" element={<Launcher />} />
-          <Route path="/store" element={<GameStore />} />
-          <Route path="/play/:gameId" element={<GamePlay />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/premium-store" element={<PremiumGameStore />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="*" element={<Navigate to="/launcher" replace />} />
-        </Routes>
+        <Suspense fallback={
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            height: '100vh',
+            fontSize: '1.5rem',
+            color: 'var(--text-primary)'
+          }}>
+            Loading...
+          </div>
+        }>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/launcher" element={<Launcher />} />
+            <Route path="/store" element={<GameStore />} />
+            <Route path="/play/:gameId" element={<GamePlay />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/premium-store" element={<PremiumGameStore />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="*" element={<Navigate to="/launcher" replace />} />
+          </Routes>
+        </Suspense>
       </Layout>
     </>
   );
