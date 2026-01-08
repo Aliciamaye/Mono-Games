@@ -19,6 +19,7 @@ const Settings = lazy(() => import('./pages/Settings'));
 const GameStore = lazy(() => import('./pages/GameStore'));
 const PremiumGameStore = lazy(() => import('./components/PremiumGameStore') as any);
 const Help = lazy(() => import('./pages/Help'));
+const About = lazy(() => import('./pages/About'));
 import Profile from './pages/Profile';
 
 // Layout
@@ -199,6 +200,7 @@ const AppContent: React.FC = () => {
             <Route path="/settings" element={<Settings />} />
             <Route path="/premium-store" element={<PremiumGameStore />} />
             <Route path="/help" element={<Help />} />
+            <Route path="/about" element={<About />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<Navigate to="/launcher" replace />} />
           </Routes>
