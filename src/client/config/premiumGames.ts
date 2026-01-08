@@ -179,6 +179,44 @@ export const PREMIUM_GAMES: PremiumGame[] = [
         fileSize: '8MB',
         features: ['Drifting Mechanics', 'Power-Ups', '4 AI Opponents', '3 Lap Races'],
         thumbnail: '🏎️'
+    },
+    
+    // Tier 4: Chill/Relaxation Games (30-40 diamonds)
+    {
+        id: 'zen-garden',
+        name: 'Zen Garden',
+        description: 'Peaceful Japanese garden - rake sand, place rocks, grow bonsai',
+        diamondCost: 30,
+        category: 'Relaxation',
+        difficulty: 'easy',
+        is3D: true,
+        fileSize: '6MB',
+        features: ['8 Rake Patterns', '5 Bonsai Species', 'Wildlife Animations', 'Meditation Mode', 'NO SCORING'],
+        thumbnail: '🎋'
+    },
+    {
+        id: 'space-explorer',
+        name: 'Space Explorer',
+        description: 'Peaceful cosmic journey - discover planets, fly through nebulae',
+        diamondCost: 35,
+        category: 'Relaxation',
+        difficulty: 'easy',
+        is3D: true,
+        fileSize: '5MB',
+        features: ['Procedural Universe', '20+ Planets', 'Beautiful Nebulae', 'Free Camera', 'NO COMBAT'],
+        thumbnail: '🌌'
+    },
+    {
+        id: 'campfire-simulator',
+        name: 'Campfire Simulator',
+        description: 'Cozy campfire experience - watch flames, roast marshmallows, relax',
+        diamondCost: 25,
+        category: 'Relaxation',
+        difficulty: 'easy',
+        is3D: true,
+        fileSize: '4MB',
+        features: ['Animated Flames', 'Particle Effects', 'Night Sky', 'Marshmallow Roasting', 'NO GOALS'],
+        thumbnail: '🔥'
     }
 ];
 

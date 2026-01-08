@@ -309,6 +309,48 @@ export const GAME_REGISTRY = [
     new: true,
     hot: true
   },
+  
+  // === CHILL/RELAXATION GAMES (3D Babylon.js) ===
+  {
+    id: 'zen-garden',
+    name: 'Zen Garden',
+    category: GAME_CATEGORIES.SIMULATION,
+    renderer: RENDERER_TYPES.THREE,
+    multiplayer: false,
+    description: 'Peaceful Japanese garden - rake sand, place rocks, grow bonsai. NO SCORING!',
+    difficulty: 'easy',
+    installed: true,
+    size: '6MB',
+    rating: 5.0,
+    new: true,
+    hot: true
+  },
+  {
+    id: 'space-explorer',
+    name: 'Space Explorer',
+    category: GAME_CATEGORIES.ADVENTURE,
+    renderer: RENDERER_TYPES.THREE,
+    multiplayer: false,
+    description: 'Peaceful cosmic journey - discover planets, fly through nebulae. NO COMBAT!',
+    difficulty: 'easy',
+    installed: true,
+    size: '5MB',
+    rating: 5.0,
+    new: true
+  },
+  {
+    id: 'campfire-simulator',
+    name: 'Campfire Simulator',
+    category: GAME_CATEGORIES.SIMULATION,
+    renderer: RENDERER_TYPES.THREE,
+    multiplayer: false,
+    description: 'Cozy campfire - watch flames, roast marshmallows, relax. NO GOALS!',
+    difficulty: 'easy',
+    installed: true,
+    size: '4MB',
+    rating: 5.0,
+    new: true
+  },
 
   // === ADVANCED 2D GAMES (Phaser) ===
   {
