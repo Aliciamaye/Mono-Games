@@ -1,0 +1,42 @@
+{
+  "name": "@mono-games/infinite-roads",
+  "version": "1.0.0",
+  "description": "The ULTIMATE chill driving game - Infinite procedural world with 15+ cars",
+  "main": "InfiniteRoadsGame.ts",
+  "author": "Mono-Games Team",
+  "license": "MIT",
+  "keywords": [
+    "driving",
+    "racing",
+    "3d",
+    "babylon.js",
+    "game",
+    "infinite",
+    "procedural",
+    "relaxing"
+  ],
+  "features": [
+    "15+ Detailed Car Models",
+    "8 Biomes (Grassland, Desert, Forest, Snow, Coastal, Mountain, Canyon, Tropical)",
+    "6 Weather Types (Clear, Rain, Fog, Storm, Sunset, Night)",
+    "Advanced Graphics (DOF, Bloom, Shadows, PBR)",
+    "Car Customization (Colors, Rims, Exhaust, Spoilers)",
+    "6 Camera Modes (Chase, Close, Cinematic, Aerial, Drone, First Person)",
+    "Radio System with 5 Stations",
+    "Achievement System",
+    "Save/Load System",
+    "Traffic System",
+    "Photo Mode",
+    "Performance Modes (Ultra, High, Medium, Low)"
+  ],
+  "requirements": {
+    "webgl": "2.0",
+    "memory": "2GB+",
+    "storage": "100MB"
+  },
+  "platforms": [
+    "Windows (EXE)",
+    "Android (APK)",
+    "Web (Browser)"
+  ]
+}
