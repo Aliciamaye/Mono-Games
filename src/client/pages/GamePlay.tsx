@@ -3,8 +3,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { loadGame } from '../services/gameStore';
 import achievementService from '../services/achievementService';
 import leaderboardService from '../services/leaderboardService';
+import diamondEarningService from '../services/diamondEarningService';
+import dailyChallengeService from '../services/dailyChallengeService';
+import useSettingsStore from '../store/settingsStore';
+import TouchControls from '../components/TouchControls';
+import { useLeaderboardUpdates } from '../hooks/useWebSocket';
+import { CelebrationOverlay } from '../components/SuccessAnimations';
 import { PlayIcon, PauseIcon, HomeIcon, GamepadIcon, RefreshIcon } from '../components/Icons';
 import type React from 'react';
+import api from '../services/api';
 
 interface GameInfo {
   score: number;
@@ -26,12 +33,25 @@ const GamePlay: React.FC = () => {
   const gameInstanceRef = useRef<GameInstance | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isInitializing = useRef<boolean>(false);
+  const sessionIdRef = useRef<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [gameInfo, setGameInfo] = useState<GameInfo>({ score: 0, highScore: 0 });
   const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [showCelebration, setShowCelebration] = useState<{ show: boolean; message?: string; type?: string }>({ show: false });
+
+  // WebSocket for live leaderboard updates
+  useLeaderboardUpdates(gameId || null, () => {
+    console.log('[GamePlay] Received live leaderboard update');
+  });
 
   useEffect(() => {
+    const checkMobile = () => window.innerWidth < 820 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    setIsMobile(checkMobile());
+    const onResize = () => setIsMobile(checkMobile());
+    window.addEventListener('resize', onResize);
+
     // Prevent double initialization in React StrictMode
     if (isInitializing.current) {
       console.log('[GamePlay] Already initializing, skipping...');
@@ -40,7 +60,7 @@ const GamePlay: React.FC = () => {
 
     isInitializing.current = true;
     let mounted = true;
-    let scoreInterval: NodeJS.Timeout | null = null;
+    let scoreInterval: ReturnType<typeof setInterval> | null = null;
 
     const initGame = async () => {
       try {
@@ -79,9 +99,125 @@ const GamePlay: React.FC = () => {
         // Set container ID
         container.id = 'game-container';
 
+        // Start game session
+        try {
+          const sessionResponse = await api.post('/api/sessions/start', {
+            gameId,
+            metadata: {
+              platform: isMobile ? 'mobile' : 'desktop',
+              userAgent: navigator.userAgent
+            }
+          });
+          sessionIdRef.current = sessionResponse.data.data.sessionId;
+          console.log('[GamePlay] Session started:', sessionIdRef.current);
+        } catch (err) {
+          console.warn('[GamePlay] Failed to start session:', err);
+          // Continue without session tracking
+        }
+
         // Initialize game
         console.log('[GamePlay] Creating game instance...');
         const game = new GameClass('game-container');
+
+        // Setup Game Over Handler (Economy & specific logic)
+        if (game.setOnGameOver) {
+          game.setOnGameOver(async (score: number) => {
+             console.log('🎮 Game Over! Processing rewards...');
+             
+             // Get settings for difficulty multiplier
+             const settings = useSettingsStore.getState().settings;
+             const aiLevel = settings.gameplay.aiLevel || 3;
+             const difficultyMultiplier = 0.7 + (aiLevel * 0.1); // Lvl 1 = 0.8x, Lvl 3 = 1.0x, Lvl 5 = 1.2x
+
+             const adjustedScore = Math.floor(score * difficultyMultiplier);
+             let totalDiamonds = 0;
+             
+             // 1. Calculate score milestone rewards
+             const scoreReward = await diamondEarningService.calculateScoreReward(adjustedScore, gameId as string);
+             if (scoreReward > 0) {
+               totalDiamonds += scoreReward;
+               console.log(`[GamePlay] Score reward: ${scoreReward} diamonds`);
+             }
+             
+             // 2. Award win bonus for high scores
+             const winBonus = await diamondEarningService.awardWinBonus(gameId as string, adjustedScore);
+             if (winBonus > 0) {
+               totalDiamonds += winBonus;
+               console.log(`[GamePlay] Win bonus: ${winBonus} diamonds`);
+             }
+             
+             // 3. Submit to Leaderboard with session
+             let leaderboardPosition = null;
+             let isNewRecord = false;
+             if (score > 0 && sessionIdRef.current) {
+                 try {
+                   const result = await leaderboardService.submitScore(
+                     gameId as string, 
+                     adjustedScore, 
+                     {
+                       sessionId: sessionIdRef.current,
+                       duration: Date.now() - (game.startTime || Date.now()),
+                       metadata: {
+                         difficulty: aiLevel,
+                         platform: isMobile ? 'mobile' : 'desktop'
+                       }
+                     }
+                   );
+                   
+                   // Check if we got a leaderboard position
+                   if (result?.rank) {
+                     leaderboardPosition = result.rank;
+                     isNewRecord = false; // Can determine from previous calls
+                   }
+                 } catch (err) {
+                   console.warn('Failed to submit score:', err);
+                 }
+             }
+             
+             // 4. Award leaderboard rewards if applicable
+             if (leaderboardPosition && leaderboardPosition <= 50) {
+               const leaderboardReward = await diamondEarningService.awardLeaderboardReward(
+                 gameId as string, 
+                 leaderboardPosition,
+                 isNewRecord
+               );
+               if (leaderboardReward > 0) {
+                 totalDiamonds += leaderboardReward;
+                 console.log(`[GamePlay] Leaderboard reward: ${leaderboardReward} diamonds for rank #${leaderboardPosition}`);
+                 
+                 // Show celebration for top 3
+                 if (leaderboardPosition <= 3) {
+                   setShowCelebration({
+                     show: true,
+                     message: leaderboardPosition === 1 ? '🏆 CHAMPION! 🏆' : `🥉 TOP ${leaderboardPosition}! 🥉`,
+                     type: 'champion'
+                   });
+                   setTimeout(() => setShowCelebration({ show: false }), 4000);
+                 }
+               }
+             }
+             
+             // Log total rewards
+             if (totalDiamonds > 0) {
+               console.log(`💎 Total diamonds earned: ${totalDiamonds}`);
+             }
+             
+             // Track daily challenges
+             dailyChallengeService.trackScore(gameId as string, adjustedScore);
+             if (leaderboardPosition) {
+               dailyChallengeService.trackLeaderboardPosition(leaderboardPosition);
+             }
+             // Track win (if score > 500 consider it a win)
+             dailyChallengeService.trackWin(adjustedScore > 500);
+             
+             // Update local state to show new high score immediately
+             setGameInfo(prev => ({
+                 ...prev,
+                 score: score,
+                 highScore: Math.max(prev.highScore, score)
+             }));
+          });
+        }
 
         console.log('[GamePlay] Initializing game...');
         game.init();
@@ -98,6 +234,9 @@ const GamePlay: React.FC = () => {
           type: 'game_played',
           gameId: gameId
         });
+
+        // Track game played for daily challenges
+        dailyChallengeService.trackGamePlayed(gameId as string);
 
         // Poll for score updates
         scoreInterval = setInterval(() => {
@@ -133,6 +272,7 @@ const GamePlay: React.FC = () => {
         }
         gameInstanceRef.current = null;
       }
+      window.removeEventListener('resize', onResize);
     };
   }, [gameId]);
 
@@ -167,6 +307,34 @@ const GamePlay: React.FC = () => {
 
   const formatGameName = (id: string) => {
     return id.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  };
+
+  const sendKeyEvent = (type: 'keydown' | 'keyup', key: string, codeOverride?: string) => {
+    const code = codeOverride || (key === ' ' ? 'Space' : key);
+    const event = new KeyboardEvent(type, {
+      key,
+      code,
+      bubbles: true,
+    });
+    window.dispatchEvent(event);
+  };
+
+  const handleDirectionalPress = (type: 'keydown' | 'keyup', direction: 'left' | 'right' | 'up' | 'down') => {
+    const mapping: Record<typeof direction, string> = {
+      left: 'ArrowLeft',
+      right: 'ArrowRight',
+      up: 'ArrowUp',
+      down: 'ArrowDown'
+    };
+    sendKeyEvent(type, mapping[direction]);
+  };
+
+  const handleActionPress = (type: 'keydown' | 'keyup') => {
+    sendKeyEvent(type, ' ');
+  };
+
+  const handleSecondaryPress = (type: 'keydown' | 'keyup') => {
+    sendKeyEvent(type, 'z', 'KeyZ');
   };
 
   if (error) {
@@ -219,7 +387,7 @@ const GamePlay: React.FC = () => {
       background: 'linear-gradient(180deg, #87CEEB 0%, #FFE5B4 100%)'
     }}>
       {/* Game Header */}
-      <div style={{
+      <div className="gameplay-header" style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         marginBottom: '1rem', padding: '1rem 1.5rem', flexWrap: 'wrap', gap: '1rem',
         background: 'white', borderRadius: '16px', border: '4px solid #FFB347',
@@ -231,11 +399,11 @@ const GamePlay: React.FC = () => {
             fontFamily: "'Comic Sans MS', cursive", fontWeight: 900,
             fontSize: '1.5rem', color: '#2C3E50', margin: 0
           }}>
-            {formatGameName(gameId)}
+            {formatGameName(gameId || '')}
           </h2>
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div className="gameplay-actions" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <div style={{ display: 'flex', gap: '1.5rem', marginRight: '1rem' }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{
@@ -304,14 +472,14 @@ const GamePlay: React.FC = () => {
               fontFamily: "'Comic Sans MS', cursive", fontSize: '1.25rem',
               fontWeight: 700, color: '#FF6B35'
             }}>
-              Loading {formatGameName(gameId)}...
+              Loading {formatGameName(gameId || '')}...
             </div>
           </div>
         )}
       </div>
 
       {/* Controls */}
-      <div style={{
+      <div className="gameplay-controls" style={{
         marginTop: '1rem', textAlign: 'center', padding: '1rem',
         background: 'white', borderRadius: '16px', border: '3px solid #FFB347'
       }}>
@@ -319,9 +487,95 @@ const GamePlay: React.FC = () => {
           color: '#7F8C8D', fontFamily: "'Comic Sans MS', cursive", margin: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
         }}>
-          <GamepadIcon size={18} /> Arrow Keys / WASD to move • Space to pause • R to restart
+          <GamepadIcon size={18} /> Arrow Keys / WASD to move • Space to pause • R to restart • Touch overlay appears on mobile
         </p>
       </div>
+
+      {isMobile && !isLoading && (
+        <div
+          className="mobile-action-bar"
+          style={{
+            position: 'fixed',
+            right: '16px',
+            bottom: '210px',
+            display: 'flex',
+            gap: '8px',
+            zIndex: 1100
+          }}
+        >
+          <button
+            onClick={handlePause}
+            style={{
+              padding: '0.75rem 1rem',
+              borderRadius: '14px',
+              border: '3px solid #FFB347',
+              background: '#FFF8DC',
+              boxShadow: '0 3px 0 #FFB347',
+              fontFamily: "'Comic Sans MS', cursive",
+              fontWeight: 700,
+              minWidth: '110px'
+            }}
+          >
+            {isPaused ? <PlayIcon size={14} /> : <PauseIcon size={14} />} {isPaused ? 'Resume' : 'Pause'}
+          </button>
+          <button
+            onClick={handleRestart}
+            style={{
+              padding: '0.75rem 1rem',
+              borderRadius: '14px',
+              border: '3px solid #FFB347',
+              background: '#FFF8DC',
+              boxShadow: '0 3px 0 #FFB347',
+              fontFamily: "'Comic Sans MS', cursive",
+              fontWeight: 700,
+              minWidth: '110px'
+            }}
+          >
+            <RefreshIcon size={14} /> Restart
+          </button>
+          <button
+            onClick={handleExit}
+            style={{
+              padding: '0.75rem 1rem',
+              borderRadius: '14px',
+              border: '3px solid #B91C2C',
+              background: '#E63946',
+              color: 'white',
+              boxShadow: '0 3px 0 #B91C2C',
+              fontFamily: "'Comic Sans MS', cursive",
+              fontWeight: 700,
+              minWidth: '110px'
+            }}
+          >
+            <HomeIcon size={14} color="white" /> Exit
+          </button>
+        </div>
+      )}
+
+      <TouchControls
+        visible={!isLoading}
+        layout="dpad"
+        onLeftDown={() => handleDirectionalPress('keydown', 'left')}
+        onLeftUp={() => handleDirectionalPress('keyup', 'left')}
+        onRightDown={() => handleDirectionalPress('keydown', 'right')}
+        onRightUp={() => handleDirectionalPress('keyup', 'right')}
+        onUpDown={() => handleDirectionalPress('keydown', 'up')}
+        onUpUp={() => handleDirectionalPress('keyup', 'up')}
+        onDownDown={() => handleDirectionalPress('keydown', 'down')}
+        onDownUp={() => handleDirectionalPress('keyup', 'down')}
+        onActionDown={() => handleActionPress('keydown')}
+        onActionUp={() => handleActionPress('keyup')}
+        onAction2Down={() => handleSecondaryPress('keydown')}
+        onAction2Up={() => handleSecondaryPress('keyup')}
+      />
+
+      {/* Celebration Overlay */}
+      {showCelebration.show && (
+        <CelebrationOverlay
+          message={showCelebration.message || 'Amazing!'}
+          onComplete={() => setShowCelebration({ show: false })}
+        />
+      )}
 
       <style>{`
         @keyframes spin {

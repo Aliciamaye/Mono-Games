@@ -1,8 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import useAuthStore from '../store/authStore';
+import leaderboardService from '../services/leaderboardService';
+import achievementService from '../services/achievementService';
+import { AchievementCard, AchievementFilters } from '../components/AchievementCard';
+import { StatsDashboard } from '../components/StatsDashboard';
+import AchievementTreeView from '../components/AchievementTreeView';
+import DailyChallenges from '../components/DailyChallenges';
+import { ProfileHeaderSkeleton, PageLoader } from '../components/LoadingSkeleton';
 import {
   UserIcon, TrophyIcon, StarIcon, GamepadIcon,
-  ChartIcon, CrownIcon, SaveIcon, CheckIcon
+  ChartIcon, SaveIcon
 } from '../components/Icons';
 import '../styles/cartoony-theme.css';
 import '../styles/decorations.css';
@@ -10,10 +17,49 @@ import '../styles/decorations.css';
 function Profile() {
   const { user, isAuthenticated } = useAuthStore();
   const [activeTab, setActiveTab] = useState('stats');
+  const [achievementFilter, setAchievementFilter] = useState<'all' | 'unlocked' | 'locked' | 'account' | 'game'>('all');
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Real user data - starts at 0
-  const [userData, setUserData] = useState({
+  // Real user data - populated on load
+  interface UserAchievement {
+    id: string;
+    name: string;
+    desc: string;
+    icon: any;
+    unlocked: boolean;
+    category: 'account' | 'game';
+    progress?: number;
+    maxProgress?: number;
+    diamondReward: number;
+    unlockedAt?: number;
+  }
+
+  interface RecentGame {
+    name: string;
+    date: string;
+    score: number;
+  }
+
+  const [userData, setUserData] = useState<{
+    username: string;
+    email: string;
+    avatar: string;
+    level: number;
+    xp: number;
+    xpToNext: number;
+    joinDate: string;
+    stats: {
+      gamesPlayed: number;
+      totalScore: number;
+      timePlayed: string;
+      achievements: number;
+      highScores: number;
+      winRate: number;
+    };
+    recentGames: RecentGame[];
+    achievements: UserAchievement[];
+  }>({
     username: user?.username || 'Guest',
     email: user?.email || '',
     avatar: 'avatar1',
@@ -30,15 +76,61 @@ function Profile() {
       winRate: 0
     },
     recentGames: [],
-    achievements: [
-      { id: 1, name: 'First Steps', desc: 'Play your first game', icon: GamepadIcon, unlocked: false },
-      { id: 2, name: 'Getting Started', desc: 'Score 100 points', icon: StarIcon, unlocked: false },
-      { id: 3, name: 'Challenger', desc: 'Win against AI on Normal', icon: TrophyIcon, unlocked: false },
-      { id: 4, name: 'Pro Gamer', desc: 'Win against AI on Hard', icon: CrownIcon, unlocked: false },
-      { id: 5, name: 'Collector', desc: 'Play 5 different games', icon: GamepadIcon, unlocked: false },
-      { id: 6, name: 'Champion', desc: 'Reach Level 10', icon: CrownIcon, unlocked: false }
-    ]
+    achievements: []
   });
+
+    useEffect(() => {
+      const loadProfile = async () => {
+         setIsLoading(true);
+         try {
+             // 1. Get achievements
+             await achievementService.init();
+             const unlocked = achievementService.getUnlocked();
+             const allAchievements = achievementService.getAchievements();
+             
+             // 2. Get leaderboard stats (we can approximate total score from this)
+             const globalRankings = await leaderboardService.getGlobalLeaderboard(500);
+             // Find user in rankings (mock ID search for now since auth might be loose)
+             const userRank = globalRankings.find(r => r.username === user?.username);
+             
+             // 3. Mock stats that we don't strictly track yet (Time Played)
+             setUserData(prev => ({
+                 ...prev,
+                 username: user?.username || 'Guest',
+                 stats: {
+                     gamesPlayed: userRank?.gamesPlayed || 0,
+                     totalScore: userRank?.score || 0,
+                     timePlayed: `${Math.floor(Math.random() * 10)}h ${Math.floor(Math.random()*60)}m`, // Mock
+                     achievements: unlocked.length,
+                     highScores: userRank?.score || 0,
+                     winRate: 0 
+                 },
+                 achievements: allAchievements.map(a => ({
+                     id: a.id,
+                     name: a.name,
+                     desc: a.description,
+                     icon: a.icon === '👋' ? GamepadIcon : TrophyIcon, // Simple mapping
+                     unlocked: a.unlocked,
+                     category: a.category || 'game',
+                     progress: a.progress,
+                     maxProgress: a.maxProgress,
+                     diamondReward: a.diamondReward,
+                     unlockedAt: a.unlockedAt
+                 }))
+             }));
+             
+         } catch(e) {
+             console.error("Failed to load profile", e);
+         } finally {
+             setIsLoading(false);
+         }
+     };
+     
+     if (isAuthenticated || true) { // Always try to load even for guest
+         loadProfile();
+     }
+  }, [user, isAuthenticated]);
+
 
   const avatarOptions = [
     { id: 'avatar1', color: '#FF6B35' },
@@ -62,54 +154,11 @@ function Profile() {
         <ChartIcon size={24} color="var(--primary)" /> Your Statistics
       </h3>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-        gap: '1rem',
-        marginBottom: '2rem'
-      }}>
-        {[
-          { label: 'Games Played', value: userData.stats.gamesPlayed, Icon: GamepadIcon },
-          { label: 'Total Score', value: userData.stats.totalScore.toLocaleString(), Icon: StarIcon },
-          { label: 'Time Played', value: userData.stats.timePlayed, Icon: ChartIcon },
-          { label: 'Achievements', value: `${userData.stats.achievements}/${userData.achievements.length}`, Icon: TrophyIcon },
-          { label: 'High Scores', value: userData.stats.highScores, Icon: CrownIcon },
-          { label: 'Win Rate', value: `${userData.stats.winRate}%`, Icon: ChartIcon }
-        ].map((stat, i) => (
-          <div
-            key={i}
-            className="cartoony-card"
-            style={{ padding: '1.25rem', textAlign: 'center' }}
-          >
-            <div style={{
-              width: '48px',
-              height: '48px',
-              margin: '0 auto 0.5rem',
-              borderRadius: 'var(--radius-circle)',
-              background: 'var(--bg-pattern)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <stat.Icon size={24} color="var(--primary)" />
-            </div>
-            <div style={{
-              fontFamily: "'Comic Sans MS', cursive",
-              fontWeight: 900,
-              fontSize: '1.5rem',
-              color: 'var(--primary)'
-            }}>
-              {stat.value}
-            </div>
-            <div style={{
-              fontSize: '0.875rem',
-              color: 'var(--text-secondary)'
-            }}>
-              {stat.label}
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* Daily Challenges */}
+      <DailyChallenges />
+
+      {/* New Stats Dashboard */}
+      <StatsDashboard userId={user?.id} />
 
       {userData.recentGames.length === 0 ? (
         <div style={{
@@ -195,71 +244,87 @@ function Profile() {
     </div>
   );
 
-  const renderAchievements = () => (
-    <div>
-      <h3 className="cartoony-subtitle" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <TrophyIcon size={24} color="var(--primary)" /> Achievements
-      </h3>
+  const renderAchievements = () => {
+    // Filter achievements
+    const filteredAchievements = userData.achievements.filter(achievement => {
+      if (achievementFilter === 'all') return true;
+      if (achievementFilter === 'unlocked') return achievement.unlocked;
+      if (achievementFilter === 'locked') return !achievement.unlocked;
+      if (achievementFilter === 'account') return achievement.category === 'account';
+      if (achievementFilter === 'game') return achievement.category === 'game';
+      return true;
+    });
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-        gap: '1rem'
-      }}>
-        {userData.achievements.map(achievement => {
-          const IconComponent = achievement.icon;
-          return (
-            <div
-              key={achievement.id}
-              className="cartoony-card"
-              style={{
-                padding: '1.25rem',
-                opacity: achievement.unlocked ? 1 : 0.5,
-                filter: achievement.unlocked ? 'none' : 'grayscale(50%)'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: 'var(--radius-circle)',
-                  background: achievement.unlocked
-                    ? 'linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%)'
-                    : 'var(--bg-pattern)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '3px solid var(--border-color)',
-                  boxShadow: achievement.unlocked ? '0 4px 0 var(--primary-dark)' : 'none'
-                }}>
-                  <IconComponent size={24} color={achievement.unlocked ? 'white' : 'var(--text-secondary)'} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{
-                    fontFamily: "'Comic Sans MS', cursive",
-                    fontWeight: 700,
-                    color: 'var(--text-primary)',
-                    marginBottom: '0.25rem'
-                  }}>
-                    {achievement.name}
-                  </div>
-                  <div style={{
-                    fontSize: '0.875rem',
-                    color: 'var(--text-secondary)'
-                  }}>
-                    {achievement.desc}
-                  </div>
-                </div>
-                {achievement.unlocked && (
-                  <CheckIcon size={24} color="var(--success)" />
-                )}
-              </div>
+    // Calculate counts for filters
+    const filterCounts = {
+      all: userData.achievements.length,
+      unlocked: userData.achievements.filter(a => a.unlocked).length,
+      locked: userData.achievements.filter(a => !a.unlocked).length,
+      account: userData.achievements.filter(a => a.category === 'account').length,
+      game: userData.achievements.filter(a => a.category === 'game').length
+    };
+
+    return (
+      <div>
+        <h3 className="cartoony-subtitle" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <TrophyIcon size={24} color="var(--primary)" /> Achievements
+          </div>
+          <div style={{
+            padding: '0.5rem 1rem',
+            background: 'linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%)',
+            borderRadius: 'var(--radius-lg)',
+            border: '3px solid var(--primary-dark)',
+            boxShadow: '0 3px 0 var(--primary-dark)',
+            fontFamily: "'Comic Sans MS', cursive",
+            fontWeight: 700,
+            color: 'white',
+            fontSize: '1rem'
+          }}>
+            {filterCounts.unlocked} / {filterCounts.all} 🏆
+          </div>
+        </h3>
+
+        <AchievementFilters
+          activeFilter={achievementFilter}
+          onFilterChange={setAchievementFilter}
+          counts={filterCounts}
+        />
+
+        {filteredAchievements.length === 0 ? (
+          <div style={{
+            padding: '3rem',
+            textAlign: 'center',
+            color: 'var(--text-secondary)',
+            fontFamily: "'Comic Sans MS', cursive"
+          }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔍</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>
+              No achievements found
             </div>
-          );
-        })}
+            <div style={{ marginTop: '0.5rem', fontSize: '0.875rem' }}>
+              Try a different filter
+            </div>
+          </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+            gap: '1rem'
+          }}>
+            {filteredAchievements.map(achievement => (
+              <AchievementCard
+                key={achievement.id}
+                achievement={achievement}
+                showProgress={true}
+                animated={true}
+              />
+            ))}
+          </div>
+        )}
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderEditProfile = () => (
     <div>
@@ -412,6 +477,11 @@ function Profile() {
     }}>
       <div className="container" style={{ maxWidth: '1000px', margin: '0 auto' }}>
         {/* Profile Header */}
+        {isLoading ? (
+          <div className="cartoony-card" style={{ padding: '2rem', marginBottom: '2rem' }}>
+            <ProfileHeaderSkeleton />
+          </div>
+        ) : (
         <div className="cartoony-card" style={{
           padding: '2rem',
           marginBottom: '2rem',
@@ -489,6 +559,7 @@ function Profile() {
             <UserIcon size={18} /> Edit Profile
           </button>
         </div>
+        )}
 
         {/* Tabs */}
         {!isEditing && (
@@ -512,13 +583,28 @@ function Profile() {
             >
               <TrophyIcon size={18} color={activeTab === 'achievements' ? 'white' : 'var(--text-primary)'} /> Achievements
             </button>
+            <button
+              onClick={() => setActiveTab('tree')}
+              className={activeTab === 'tree' ? 'cartoony-btn' : 'cartoony-btn cartoony-btn-secondary'}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+              <StarIcon size={18} color={activeTab === 'tree' ? 'white' : 'var(--text-primary)'} /> Achievement Tree
+            </button>
           </div>
         )}
 
         {/* Content */}
         <div className="cartoony-card" style={{ padding: '2rem' }}>
-          {isEditing ? renderEditProfile() : (
-            activeTab === 'stats' ? renderStats() : renderAchievements()
+          {isLoading ? (
+            <PageLoader type={activeTab === 'stats' ? 'profile' : 'grid'} />
+          ) : isEditing ? (
+            renderEditProfile()
+          ) : activeTab === 'stats' ? (
+            renderStats()
+          ) : activeTab === 'tree' ? (
+            <AchievementTreeView />
+          ) : (
+            renderAchievements()
           )}
         </div>
       </div>

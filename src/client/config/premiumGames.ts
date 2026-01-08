@@ -12,21 +12,27 @@ export interface PremiumGame {
     fileSize: string;
     features: string[];
     thumbnail: string;
+    hasLocalMultiplayer?: boolean;
+    aiUnlockCost?: number; // Cost to unlock AI (15💎)
+    requiresLogin?: boolean; // Require login to purchase
 }
 
 export const PREMIUM_GAMES: PremiumGame[] = [
-    // Tier 1: Light games (25 diamonds) - Very affordable!
+    // Tier 1: Light games (25 diamonds)
     {
         id: 'chess',
         name: 'Chess Master',
-        description: 'Classic chess with AI opponent and tutorials',
+        description: 'Classic chess with local 2-player mode',
         diamondCost: 25,
         category: 'Strategy',
         difficulty: 'medium',
         is3D: false,
         fileSize: '2MB',
-        features: ['AI Opponent', 'Move Hints', 'Game Analysis'],
-        thumbnail: '♟️'
+        features: ['Local 2-Player', 'Move Hints', 'Game Analysis'],
+        thumbnail: '♟️',
+        hasLocalMultiplayer: true,
+        aiUnlockCost: 15,
+        requiresLogin: true
     },
     {
         id: 'sudoku',
@@ -53,12 +59,12 @@ export const PREMIUM_GAMES: PremiumGame[] = [
         thumbnail: '🀄'
     },
 
-    // Tier 2: Medium games (75 diamonds) - Great value!
+    // Tier 2: Medium games (50 diamonds)
     {
         id: 'tower-defense',
         name: 'Tower Defense Pro',
         description: 'Strategic tower defense with 20+ levels',
-        diamondCost: 75,
+        diamondCost: 50,
         category: 'Strategy',
         difficulty: 'hard',
         is3D: false,
@@ -70,7 +76,7 @@ export const PREMIUM_GAMES: PremiumGame[] = [
         id: 'rpg-dungeon',
         name: 'Dungeon Crawler RPG',
         description: 'Roguelike dungeon crawler with procedural levels',
-        diamondCost: 75,
+        diamondCost: 50,
         category: 'RPG',
         difficulty: 'hard',
         is3D: false,
@@ -82,7 +88,7 @@ export const PREMIUM_GAMES: PremiumGame[] = [
         id: 'rhythm-game',
         name: 'Rhythm Master',
         description: 'Music rhythm game with original tracks',
-        diamondCost: 75,
+        diamondCost: 50,
         category: 'Music',
         difficulty: 'medium',
         is3D: false,
@@ -91,24 +97,27 @@ export const PREMIUM_GAMES: PremiumGame[] = [
         thumbnail: '🎵'
     },
 
-    // Tier 3: Premium 3D games (150 diamonds) - Best experience!
+    // Tier 3: Premium 3D games (75 diamonds)
     {
         id: 'fps-shooter',
         name: 'FPS Arena',
-        description: '3D first-person shooter with multiplayer',
-        diamondCost: 150,
+        description: '3D first-person shooter with local co-op',
+        diamondCost: 75,
         category: 'Action',
         difficulty: 'expert',
         is3D: true,
         fileSize: '15MB',
-        features: ['3D Graphics', 'Multiplayer', '5 Game Modes', 'Weapon Customization'],
-        thumbnail: '🔫'
+        features: ['3D Graphics', 'Local Co-op', '5 Game Modes', 'Weapon Customization'],
+        thumbnail: '🔫',
+        hasLocalMultiplayer: true,
+        aiUnlockCost: 15,
+        requiresLogin: true
     },
     {
         id: 'open-world',
         name: 'Open World Adventure',
         description: '3D open world exploration game',
-        diamondCost: 150,
+        diamondCost: 75,
         category: 'Adventure',
         difficulty: 'expert',
         is3D: true,
@@ -119,26 +128,57 @@ export const PREMIUM_GAMES: PremiumGame[] = [
     {
         id: 'racing-3d',
         name: '3D Racing Pro',
-        description: 'Realistic 3D racing with physics',
-        diamondCost: 150,
+        description: 'Realistic 3D racing with split-screen multiplayer',
+        diamondCost: 75,
         category: 'Racing',
         difficulty: 'hard',
         is3D: true,
         fileSize: '18MB',
-        features: ['3D Graphics', '10 Tracks', 'Car Customization', 'Time Trials'],
-        thumbnail: '🏎️'
+        features: ['3D Graphics', 'Local Split-Screen', '10 Tracks', 'Car Customization'],
+        thumbnail: '🏎️',
+        hasLocalMultiplayer: true,
+        aiUnlockCost: 15,
+        requiresLogin: true
     },
     {
         id: 'survival-craft',
         name: 'Survival Crafter',
         description: 'Minecraft-style survival crafting game',
-        diamondCost: 150,
+        diamondCost: 75,
         category: 'Survival',
         difficulty: 'expert',
         is3D: true,
         fileSize: '25MB',
         features: ['3D Voxel World', 'Crafting System', 'Building', 'Day/Night Cycle'],
         thumbnail: '⛏️'
+    },
+    
+    // NEW GAMES - Ultimate Update v2.0
+    {
+        id: 'poker',
+        name: 'Texas Hold\'em Poker',
+        description: 'Professional poker with AI opponents',
+        diamondCost: 50,
+        category: 'Card',
+        difficulty: 'medium',
+        is3D: false,
+        fileSize: '3MB',
+        features: ['Texas Hold\'em', 'AI Opponent', 'Pot System', 'Hand Rankings'],
+        thumbnail: '🃏',
+        aiUnlockCost: 15,
+        requiresLogin: true
+    },
+    {
+        id: 'kart-racing',
+        name: 'Kart Racing',
+        description: 'Mario Kart style racing with power-ups',
+        diamondCost: 75,
+        category: 'Racing',
+        difficulty: 'hard',
+        is3D: false,
+        fileSize: '8MB',
+        features: ['Drifting Mechanics', 'Power-Ups', '4 AI Opponents', '3 Lap Races'],
+        thumbnail: '🏎️'
     }
 ];
 

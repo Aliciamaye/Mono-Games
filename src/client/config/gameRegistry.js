@@ -150,6 +150,33 @@ export const GAME_REGISTRY = [
     new: true
   },
   {
+    id: 'infinite-roads',
+    name: 'Infinite Roads',
+    category: GAME_CATEGORIES.SIMULATION,
+    renderer: 'babylon',
+    multiplayer: false,
+    description: 'Relaxing 3D infinite driving with dynamic weather and day/night cycle',
+    difficulty: 'easy',
+    installed: true,
+    size: '1.2MB',
+    rating: 4.9,
+    new: true,
+    is3D: true
+  },
+  {
+    id: 'match-3',
+    name: 'Match-3 Gems',
+    category: GAME_CATEGORIES.PUZZLE,
+    renderer: RENDERER_TYPES.CANVAS_2D,
+    multiplayer: false,
+    description: 'Classic gem-matching puzzle with cascades and combos',
+    difficulty: 'easy',
+    installed: true,
+    size: '0.7MB',
+    rating: 4.7,
+    new: true
+  },
+  {
     id: 'tic-tac-toe',
     name: 'Tic Tac Toe',
     category: GAME_CATEGORIES.STRATEGY,
@@ -251,6 +278,36 @@ export const GAME_REGISTRY = [
     installed: true,
     size: '2.8MB',
     rating: 4.4
+  },
+  
+  // === NEW PREMIUM GAMES (Ultimate Update v2.0) ===
+  {
+    id: 'poker',
+    name: 'Texas Hold\'em Poker',
+    category: GAME_CATEGORIES.STRATEGY,
+    renderer: RENDERER_TYPES.CANVAS_2D,
+    multiplayer: false,
+    description: 'Professional poker with AI opponents',
+    difficulty: 'medium',
+    installed: true,
+    size: '3MB',
+    rating: 4.7,
+    new: true,
+    hot: true
+  },
+  {
+    id: 'kart-racing',
+    name: 'Kart Racing',
+    category: GAME_CATEGORIES.RACING,
+    renderer: RENDERER_TYPES.CANVAS_2D,
+    multiplayer: false,
+    description: 'Mario Kart style racing with power-ups and drifting',
+    difficulty: 'hard',
+    installed: true,
+    size: '8MB',
+    rating: 4.9,
+    new: true,
+    hot: true
   },
 
   // === ADVANCED 2D GAMES (Phaser) ===

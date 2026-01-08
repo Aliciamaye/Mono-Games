@@ -4,6 +4,8 @@ import { db } from '../utils/db.js';
 import { auth } from '../middleware/auth.js';
 import { validateRequest } from '../middleware/validation.js';
 import { validateScore } from '../services/antiCheat.js';
+import realtimeManager from '../services/realtimeManager.js';
+import sessionManager from '../services/sessionManager.js';
 
 const router = express.Router();
 
@@ -48,45 +50,70 @@ router.get('/:gameId', async (req, res, next) => {
 router.post('/:gameId', auth, validateRequest(submitScoreSchema), async (req, res, next) => {
   try {
     const { gameId } = req.params;
-    const { score, timestamp, signature, duration, metadata } = req.body;
+    const { score, timestamp, signature, duration, metadata, sessionId } = req.body;
     const userId = req.user.id;
 
-    // Validate score with anti-cheat
-    const validation = validateScore({
+    // Validate score with enhanced anti-cheat
+    const validation = await validateScore({
       userId,
       gameId,
       score,
       timestamp,
       signature,
-      duration
+      duration,
+      sessionId,
+      metadata
     });
 
     if (!validation.isValid) {
       return res.status(400).json({
         success: false,
         message: 'Score validation failed',
-        reason: validation.reason
+        reason: validation.reason || 'Anti-cheat validation failed',
+        flags: validation.flags,
+        confidence: validation.confidence
       });
     }
 
+    // Use adjusted score if confidence is low
+    const finalScore = validation.adjustedScore || score;
+
     // Check if it's a new personal best
     const currentBest = await db.getUserBestScore(userId, gameId);
-    const isNewBest = !currentBest || score > currentBest.score;
+    const isNewBest = !currentBest || finalScore > currentBest.score;
 
     if (isNewBest) {
       // Submit new score
       const scoreData = {
         user_id: userId,
         game_id: gameId,
-        score,
-        metadata,
+        score: finalScore,
+        metadata: JSON.stringify({
+          ...metadata,
+          validation: {
+            confidence: validation.confidence,
+            flags: validation.flags,
+            originalScore: score
+          }
+        }),
         submitted_at: new Date().toISOString()
       };
 
       const newScore = await db.submitScore(scoreData);
 
-      // Check for achievements
-      // TODO: Implement achievement checking logic
+      // Get updated leaderboard
+      const updatedLeaderboard = await db.getLeaderboard(gameId, 10);
+
+      // Broadcast to WebSocket subscribers
+      realtimeManager.broadcastLeaderboardUpdate(gameId, updatedLeaderboard);
+
+      // Send notification to user
+      realtimeManager.sendNotification(userId, {
+        type: 'achievement',
+        title: 'New High Score!',
+        message: `You scored ${finalScore} in ${gameId}`,
+        icon: '🏆'
+      });
 
       res.json({
         success: true,
@@ -94,7 +121,11 @@ router.post('/:gameId', auth, validateRequest(submitScoreSchema), async (req, re
         data: {
           score: newScore.score,
           isNewBest: true,
-          previousBest: currentBest?.score || 0
+          previousBest: currentBest?.score || 0,
+          validation: {
+            confidence: validation.confidence,
+            adjusted: finalScore !== score
+          }
         }
       });
     } else {
@@ -102,7 +133,7 @@ router.post('/:gameId', auth, validateRequest(submitScoreSchema), async (req, re
         success: true,
         message: 'Score recorded but not a new best',
         data: {
-          score,
+          score: finalScore,
           isNewBest: false,
           currentBest: currentBest.score
         }

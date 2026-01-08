@@ -1,5 +1,6 @@
 import BaseGame from '../../shared/framework/BaseGame.js';
 import { getAI, AI_LEVELS } from '../../shared/AIOpponent.js';
+import useSettingsStore from '../../../store/settingsStore';
 
 /**
  * Connect Four with AI
@@ -8,8 +9,18 @@ class ConnectFour extends BaseGame {
     constructor(containerId) {
         super(containerId, 'connect-four', 700, 630);
 
-        this.ai = getAI(3);
-        this.aiLevel = 3;
+        const settings = useSettingsStore.getState().settings;
+        const difficulty = settings.gameplay.difficulty || 'normal';
+        let aiLevel = 3;
+        
+        switch(difficulty) {
+            case 'easy': aiLevel = 1; break;
+            case 'normal': aiLevel = 3; break;
+            case 'hard': aiLevel = 5; break;
+        }
+
+        this.ai = getAI(aiLevel);
+        this.aiLevel = aiLevel;
 
         this.rows = 6;
         this.cols = 7;

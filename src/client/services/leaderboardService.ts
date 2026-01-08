@@ -41,7 +41,15 @@ class LeaderboardService {
     }
 
     // Submit score to leaderboard
-    async submitScore(gameId: string, score: number): Promise<{ success: boolean; stars: number; rank?: number; error?: string }> {
+    async submitScore(
+        gameId: string, 
+        score: number, 
+        options?: {
+            sessionId?: string;
+            duration?: number;
+            metadata?: any;
+        }
+    ): Promise<{ success: boolean; stars: number; rank?: number; error?: string }> {
         try {
             const stars = this.convertToStars(gameId, score);
 
@@ -49,7 +57,10 @@ class LeaderboardService {
                 gameId,
                 score,
                 stars,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                sessionId: options?.sessionId,
+                duration: options?.duration,
+                metadata: options?.metadata
             });
 
             return {

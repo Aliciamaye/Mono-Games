@@ -31,6 +31,17 @@ class BaseGame {
     
     // Audio support
     this.soundEnabled = true;
+    
+    // Callbacks
+    this.onGameOverCallback = null;
+  }
+
+  /**
+   * Set callback for game over event
+   * @param {Function} callback - Function to call when game ends (receives score)
+   */
+  setOnGameOver(callback) {
+    this.onGameOverCallback = callback;
   }
 
   /**
@@ -44,6 +55,12 @@ class BaseGame {
       return this;
     }
 
+    // Only remove old canvas elements, not all children (React may be managing other elements)
+    const oldCanvas = container.querySelector('canvas');
+    if (oldCanvas) {
+      oldCanvas.remove();
+    }
+
     this.canvas = document.createElement('canvas');
     this.canvas.id = 'game-canvas';
     this.canvas.width = this.width;
@@ -53,7 +70,6 @@ class BaseGame {
     this.canvas.style.borderRadius = '16px';
     this.canvas.style.boxShadow = '0 8px 32px rgba(0,0,0,0.3)';
 
-    container.innerHTML = '';
     container.appendChild(this.canvas);
 
     this.ctx = this.canvas.getContext('2d');
@@ -173,6 +189,11 @@ class BaseGame {
     this.ctx.font = '18px "Comic Sans MS", cursive';
     this.ctx.fillStyle = '#87CEEB';
     this.ctx.fillText('Press R to restart', this.canvas.width / 2, this.canvas.height / 2 + 70);
+
+    // Trigger callback if set
+    if (this.onGameOverCallback) {
+      this.onGameOverCallback(this.score);
+    }
   }
 
   reset() {

@@ -1,8 +1,11 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import { useEffect, useState, lazy, Suspense } from 'react';
+import { useEffect, useState, lazy } from 'react';
 import useSettingsStore from './store/settingsStore';
 import useAuthStore from './store/authStore';
 import audioManager, { MusicTracks } from './utils/audioManager';
+import { NotificationProvider } from './components/NotificationProvider';
+import { ToastProvider } from './components/ToastNotification';
+import SyncStatusIndicator from './components/SyncStatusIndicator';
 import type React from 'react';
 
 // Pages
@@ -13,9 +16,9 @@ const Launcher = lazy(() => import('./pages/GameLauncher'));
 const GamePlay = lazy(() => import('./pages/GamePlay'));
 const Leaderboard = lazy(() => import('./pages/Leaderboard'));
 const Settings = lazy(() => import('./pages/Settings'));
-const PremiumGameStore = lazy(() => import('./components/PremiumGameStore'));
+const GameStore = lazy(() => import('./pages/GameStore'));
+const PremiumGameStore = lazy(() => import('./components/PremiumGameStore') as any);
 import Profile from './pages/Profile';
-import NotFound from './pages/NotFound';
 
 // Layout
 import Layout from './components/layout/Layout';
@@ -24,33 +27,6 @@ import FPSCounter from './components/FPSCounter';
 // Styles
 import './styles/responsive.css';
 import './styles/transitions.css';
-
-// Page transition wrapper
-const PageTransition: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const location = useLocation();
-  const [displayLocation, setDisplayLocation] = useState(location);
-  const [transitionStage, setTransitionStage] = useState('fadeIn');
-
-  useEffect(() => {
-    if (location !== displayLocation) {
-      setTransitionStage('fadeOut');
-    }
-  }, [location, displayLocation]);
-
-  return (
-    <div
-      className={`page-transition ${transitionStage}`}
-      onAnimationEnd={() => {
-        if (transitionStage === 'fadeOut') {
-          setTransitionStage('fadeIn');
-          setDisplayLocation(location);
-        }
-      }}
-    >
-      {children}
-    </div>
-  );
-};
 
 const AppContent: React.FC = () => {
   const { loadSettings, settings } = useSettingsStore();
@@ -197,17 +173,18 @@ const AppContent: React.FC = () => {
   return (
     <>
       <FPSCounter />
+      <SyncStatusIndicator />
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/launcher" element={<GameLauncher />} />
+          <Route path="/launcher" element={<Launcher />} />
           <Route path="/store" element={<GameStore />} />
           <Route path="/play/:gameId" element={<GamePlay />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/store" element={<PremiumGameStore />} />
+          <Route path="/premium-store" element={<PremiumGameStore />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<Navigate to="/launcher" replace />} />
         </Routes>
@@ -219,7 +196,11 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <Router>
-      <AppContent />
+      <ToastProvider>
+        <NotificationProvider>
+          <AppContent />
+        </NotificationProvider>
+      </ToastProvider>
     </Router>
   );
 }

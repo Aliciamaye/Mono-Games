@@ -10,12 +10,13 @@
     "dev:server": "cd src/server && node --watch server.js",
     "dev:all": "concurrently \"npm:dev:client\" \"npm:dev:server\"",
     "build": "npm run build:web",
-    "build:web": "cd src/client && vite build",
+    "build:web": "cross-env BUILD_TARGET=web vite build --config config/vite.config.js",
+    "build:electron": "cross-env BUILD_TARGET=electron vite build --config config/vite.config.js",
+    "build:mobile": "cross-env BUILD_TARGET=mobile vite build --config config/vite.config.js",
     "build:server": "cd src/server && npm run build",
-    "build:desktop": "node scripts/build-desktop.js",
-    "build:mobile": "node scripts/build-mobile.js",
-    "build:all": "npm run build:web && npm run build:desktop && npm run build:mobile",
-    "package:games": "node scripts/package-games.js",
+    "build:all": "npm run build:web && npm run build:electron && npm run build:mobile",
+    "package:electron": "electron-builder --config electron-builder.config.js",
+    "package:android": "cd dist/mobile && cap sync android && cap open android",
     "preview": "cd src/client && vite preview",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
@@ -46,6 +47,7 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
+    "cross-env": "^10.1.0",
     "eslint": "^8.57.0",
     "prettier": "^3.2.4",
     "vitest": "^1.2.0"
@@ -53,5 +55,10 @@
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
+  },
+  "dependencies": {
+    "@babylonjs/core": "^8.45.0",
+    "@babylonjs/loaders": "^8.45.0",
+    "@babylonjs/materials": "^8.45.0"
   }
 }

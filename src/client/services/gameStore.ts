@@ -113,12 +113,16 @@ export const loadGame = async (gameId) => {
         const module = await import('../games/core/minesweeper/index.js');
         return module.default;
       }
+      case 'match-3': {
+        const module = await import('../games/core/match-3/index.js');
+        return module.default;
+      }
       case 'racing': {
         const module = await import('../games/core/racing/index.js');
         return module.default;
       }
       case 'infinite-roads': {
-        const module = await import('../games/core/infinite-roads/index.js');
+        const module = await import('../games/core/InfiniteRoads.ts');
         return module.default;
       }
       case 'space-shooter': {

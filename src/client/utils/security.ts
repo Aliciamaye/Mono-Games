@@ -50,7 +50,7 @@ export const hash = (data: any): string => {
 /**
  * Verify hash integrity
  */
-export const verifyHash = (data, expectedHash) => {
+export const verifyHash = (data: string, expectedHash: string): boolean => {
   const dataHash = hash(data);
   return dataHash === expectedHash;
 };
@@ -60,14 +60,18 @@ export const verifyHash = (data, expectedHash) => {
 /**
  * Calculate file checksum
  */
-export const calculateChecksum = async (file) => {
+export const calculateChecksum = async (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     
     reader.onload = (event) => {
-      const wordArray = CryptoJS.lib.WordArray.create(event.target.result);
-      const checksum = CryptoJS.SHA256(wordArray).toString();
-      resolve(checksum);
+      if (event.target?.result && event.target.result instanceof ArrayBuffer) {
+        const wordArray = CryptoJS.lib.WordArray.create(event.target.result);
+        const checksum = CryptoJS.SHA256(wordArray).toString();
+        resolve(checksum);
+      } else {
+        reject(new Error('Failed to read file'));
+      }
     };
     
     reader.onerror = reject;
@@ -78,7 +82,7 @@ export const calculateChecksum = async (file) => {
 /**
  * Verify file integrity
  */
-export const verifyFileIntegrity = async (file, expectedChecksum) => {
+export const verifyFileIntegrity = async (file: File, expectedChecksum: string): Promise<boolean> => {
   const actualChecksum = await calculateChecksum(file);
   return actualChecksum === expectedChecksum;
 };
@@ -88,7 +92,7 @@ export const verifyFileIntegrity = async (file, expectedChecksum) => {
 /**
  * Sanitize HTML to prevent XSS
  */
-export const sanitizeHTML = (html) => {
+export const sanitizeHTML = (html: string): string => {
   const temp = document.createElement('div');
   temp.textContent = html;
   return temp.innerHTML;
@@ -120,18 +124,22 @@ export const validatePassword = (password: string): { isValid: boolean; strength
   const hasNumbers = /\d/.test(password);
   const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
+  const strength = calculatePasswordStrength(password);
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (hasUpperCase) score++;
+  if (hasLowerCase) score++;
+  if (hasNumbers) score++;
+  if (hasSpecialChar) score++;
+
   return {
     isValid: password.length >= minLength && hasUpperCase && hasLowerCase && hasNumbers,
-    length: password.length >= minLength,
-    hasUpperCase,
-    hasLowerCase,
-    hasNumbers,
-    hasSpecialChar,
-    strength: calculatePasswordStrength(password)
+    strength,
+    score
   };
 };
 
-const calculatePasswordStrength = (password) => {
+const calculatePasswordStrength = (password: string): string => {
   let strength = 0;
   if (password.length >= 8) strength++;
   if (password.length >= 12) strength++;
@@ -150,11 +158,14 @@ const calculatePasswordStrength = (password) => {
 /**
  * Store encrypted data in localStorage
  */
-export const secureStore = (key, data) => {
+export const secureStore = (key: string, data: any): boolean => {
   try {
     const encrypted = encrypt(data);
-    localStorage.setItem(key, encrypted);
-    return true;
+    if (encrypted) {
+      localStorage.setItem(key, encrypted);
+      return true;
+    }
+    return false;
   } catch (error) {
     console.error('Secure store error:', error);
     return false;
@@ -164,7 +175,7 @@ export const secureStore = (key, data) => {
 /**
  * Retrieve and decrypt data from localStorage
  */
-export const secureRetrieve = (key) => {
+export const secureRetrieve = (key: string): any => {
   try {
     const encrypted = localStorage.getItem(key);
     if (!encrypted) return null;
@@ -178,7 +189,7 @@ export const secureRetrieve = (key) => {
 /**
  * Remove data from secure storage
  */
-export const secureRemove = (key) => {
+export const secureRemove = (key: string): boolean => {
   try {
     localStorage.removeItem(key);
     return true;
@@ -193,7 +204,7 @@ export const secureRemove = (key) => {
 /**
  * Generate timestamp signature for score submission
  */
-export const generateScoreSignature = (userId, gameId, score, timestamp) => {
+export const generateScoreSignature = (userId: string | number, gameId: string, score: number, timestamp: number): string => {
   const data = `${userId}-${gameId}-${score}-${timestamp}`;
   return hash(data);
 };
@@ -201,7 +212,7 @@ export const generateScoreSignature = (userId, gameId, score, timestamp) => {
 /**
  * Verify score signature
  */
-export const verifyScoreSignature = (userId, gameId, score, timestamp, signature) => {
+export const verifyScoreSignature = (userId: string | number, gameId: string, score: number, timestamp: number, signature: string): boolean => {
   const expectedSignature = generateScoreSignature(userId, gameId, score, timestamp);
   return expectedSignature === signature;
 };
@@ -222,7 +233,7 @@ export const generateAntiCheatToken = () => {
 /**
  * Validate timing (detect impossible scores/times)
  */
-export const validateTiming = (startTime, endTime, minDuration = 1000) => {
+export const validateTiming = (startTime: number, endTime: number, minDuration: number = 1000): boolean => {
   const duration = endTime - startTime;
   return duration >= minDuration && duration < 86400000; // Max 24 hours
 };
@@ -232,7 +243,7 @@ export const validateTiming = (startTime, endTime, minDuration = 1000) => {
 /**
  * Sign API request
  */
-export const signRequest = (method, url, body = null) => {
+export const signRequest = (method: string, url: string, body: any = null): { signature: string; timestamp: number; nonce: string } => {
   const timestamp = Date.now();
   const nonce = Math.random().toString(36).substring(2);
   const data = `${method}:${url}:${timestamp}:${nonce}${body ? ':' + JSON.stringify(body) : ''}`;
@@ -256,7 +267,7 @@ export const generateCSRFToken = () => {
 /**
  * Verify CSRF token
  */
-export const verifyCSRFToken = (token) => {
+export const verifyCSRFToken = (token: string): boolean => {
   const storedToken = sessionStorage.getItem('csrf_token');
   return token === storedToken;
 };
@@ -268,7 +279,7 @@ const requestLog = new Map();
 /**
  * Check if request is rate limited
  */
-export const isRateLimited = (endpoint, maxRequests = 10, windowMs = 60000) => {
+export const isRateLimited = (endpoint: string, maxRequests: number = 10, windowMs: number = 60000): boolean => {
   const now = Date.now();
   const key = endpoint;
   
@@ -276,10 +287,10 @@ export const isRateLimited = (endpoint, maxRequests = 10, windowMs = 60000) => {
     requestLog.set(key, []);
   }
   
-  const requests = requestLog.get(key);
+  const requests = requestLog.get(key)!;
   
   // Remove old requests outside the window
-  const validRequests = requests.filter(timestamp => now - timestamp < windowMs);
+  const validRequests = requests.filter((timestamp: number) => now - timestamp < windowMs);
   
   if (validRequests.length >= maxRequests) {
     return true;

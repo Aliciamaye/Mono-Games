@@ -7,23 +7,35 @@ import { useEffect, useState } from 'react';
 import type React from 'react';
 
 interface TouchControlsProps {
-  onLeft?: () => void;
-  onRight?: () => void;
-  onUp?: () => void;
-  onDown?: () => void;
-  onAction?: () => void; // Jump, shoot, etc
-  onAction2?: () => void; // Secondary action
+  onLeftDown?: () => void;
+  onLeftUp?: () => void;
+  onRightDown?: () => void;
+  onRightUp?: () => void;
+  onUpDown?: () => void;
+  onUpUp?: () => void;
+  onDownDown?: () => void;
+  onDownUp?: () => void;
+  onActionDown?: () => void; // Jump, shoot, etc
+  onActionUp?: () => void;
+  onAction2Down?: () => void; // Secondary action
+  onAction2Up?: () => void;
   layout?: 'dpad' | 'arrows' | 'simple';
   visible?: boolean;
 }
 
 const TouchControls: React.FC<TouchControlsProps> = ({
-  onLeft,
-  onRight,
-  onUp,
-  onDown,
-  onAction,
-  onAction2,
+  onLeftDown,
+  onLeftUp,
+  onRightDown,
+  onRightUp,
+  onUpDown,
+  onUpUp,
+  onDownDown,
+  onDownUp,
+  onActionDown,
+  onActionUp,
+  onAction2Down,
+  onAction2Up,
   layout = 'dpad',
   visible = true
 }) => {
@@ -64,16 +76,8 @@ const TouchControls: React.FC<TouchControlsProps> = ({
     transition: 'all 0.15s ease'
   };
 
-  const activeStyle: React.CSSProperties = {
-    ...buttonStyle,
-    background: 'rgba(255, 107, 53, 0.6)',
-    transform: 'scale(0.95)'
-  };
-
-  const handleTouch = (callback?: () => void) => {
-    if (callback) {
-      callback();
-    }
+  const handlePress = (callback?: () => void) => {
+    if (callback) callback();
   };
 
   return (
@@ -97,9 +101,11 @@ const TouchControls: React.FC<TouchControlsProps> = ({
           pointerEvents: 'auto'
         }}>
           {/* Up */}
-          {onUp && (
+          {onUpDown && (
             <button
-              onTouchStart={() => handleTouch(onUp)}
+              onPointerDown={() => handlePress(onUpDown)}
+              onPointerUp={() => handlePress(onUpUp)}
+              onPointerCancel={() => handlePress(onUpUp)}
               style={{
                 ...buttonStyle,
                 position: 'absolute',
@@ -113,9 +119,11 @@ const TouchControls: React.FC<TouchControlsProps> = ({
           )}
           
           {/* Down */}
-          {onDown && (
+          {onDownDown && (
             <button
-              onTouchStart={() => handleTouch(onDown)}
+              onPointerDown={() => handlePress(onDownDown)}
+              onPointerUp={() => handlePress(onDownUp)}
+              onPointerCancel={() => handlePress(onDownUp)}
               style={{
                 ...buttonStyle,
                 position: 'absolute',
@@ -129,9 +137,11 @@ const TouchControls: React.FC<TouchControlsProps> = ({
           )}
           
           {/* Left */}
-          {onLeft && (
+          {onLeftDown && (
             <button
-              onTouchStart={() => handleTouch(onLeft)}
+              onPointerDown={() => handlePress(onLeftDown)}
+              onPointerUp={() => handlePress(onLeftUp)}
+              onPointerCancel={() => handlePress(onLeftUp)}
               style={{
                 ...buttonStyle,
                 position: 'absolute',
@@ -145,9 +155,11 @@ const TouchControls: React.FC<TouchControlsProps> = ({
           )}
           
           {/* Right */}
-          {onRight && (
+          {onRightDown && (
             <button
-              onTouchStart={() => handleTouch(onRight)}
+              onPointerDown={() => handlePress(onRightDown)}
+              onPointerUp={() => handlePress(onRightUp)}
+              onPointerCancel={() => handlePress(onRightUp)}
               style={{
                 ...buttonStyle,
                 position: 'absolute',
@@ -173,18 +185,22 @@ const TouchControls: React.FC<TouchControlsProps> = ({
           justifyContent: 'space-between',
           pointerEvents: 'auto'
         }}>
-          {onLeft && (
+          {onLeftDown && (
             <button
-              onTouchStart={() => handleTouch(onLeft)}
+              onPointerDown={() => handlePress(onLeftDown)}
+              onPointerUp={() => handlePress(onLeftUp)}
+              onPointerCancel={() => handlePress(onLeftUp)}
               style={buttonStyle}
             >
               ◀
             </button>
           )}
           
-          {onRight && (
+          {onRightDown && (
             <button
-              onTouchStart={() => handleTouch(onRight)}
+              onPointerDown={() => handlePress(onRightDown)}
+              onPointerUp={() => handlePress(onRightUp)}
+              onPointerCancel={() => handlePress(onRightUp)}
               style={buttonStyle}
             >
               ▶
@@ -202,9 +218,11 @@ const TouchControls: React.FC<TouchControlsProps> = ({
         gap: '15px',
         pointerEvents: 'auto'
       }}>
-        {onAction2 && (
+        {onAction2Down && (
           <button
-            onTouchStart={() => handleTouch(onAction2)}
+            onPointerDown={() => handlePress(onAction2Down)}
+            onPointerUp={() => handlePress(onAction2Up)}
+            onPointerCancel={() => handlePress(onAction2Up)}
             style={{
               ...buttonStyle,
               background: 'rgba(78, 205, 196, 0.3)'
@@ -214,9 +232,11 @@ const TouchControls: React.FC<TouchControlsProps> = ({
           </button>
         )}
         
-        {onAction && (
+        {onActionDown && (
           <button
-            onTouchStart={() => handleTouch(onAction)}
+            onPointerDown={() => handlePress(onActionDown)}
+            onPointerUp={() => handlePress(onActionUp)}
+            onPointerCancel={() => handlePress(onActionUp)}
             style={{
               ...buttonStyle,
               width: '70px',

@@ -1,4 +1,5 @@
 import BaseGame from '../../shared/framework/BaseGame.js';
+import useSettingsStore from '../../../store/settingsStore';
 
 /**
  * Classic Snake Game - Retro Style
@@ -7,9 +8,19 @@ class SnakeGame extends BaseGame {
   constructor(containerId) {
     super(containerId, 'snake', 600, 600);
 
+    const settings = useSettingsStore.getState().settings;
+    this.difficulty = settings.gameplay.difficulty || 'normal'; // easy, normal, hard
+
+    // Difficulty settings
+    const speedMap = {
+      'easy': 8,
+      'normal': 12, // Faster
+      'hard': 18
+    };
+
     this.gridSize = 20;
     this.tileCount = 30;
-    this.fps = 10;
+    this.fps = speedMap[this.difficulty];
 
     this.snake = [];
     this.apple = { x: 0, y: 0 };

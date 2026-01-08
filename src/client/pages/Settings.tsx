@@ -15,6 +15,7 @@ function Settings() {
   const tabs = [
     { id: 'gameplay', icon: GamepadIcon, label: 'Gameplay' },
     { id: 'ai', icon: RobotIcon, label: 'AI Mode' },
+    { id: 'graphics', icon: SettingsIcon, label: 'Graphics' },
     { id: 'audio', icon: VolumeIcon, label: 'Audio' },
     { id: 'display', icon: PaletteIcon, label: 'Display' },
     { id: 'data', icon: SaveIcon, label: 'Data' }
@@ -350,6 +351,107 @@ function Settings() {
                   </button>
                 ))}
               </div>
+            </div>
+          </div>
+        );
+
+      case 'graphics':
+        return (
+          <div>
+            <h3 className="cartoony-subtitle" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <SettingsIcon size={24} color="var(--primary)" /> Graphics & Performance
+            </h3>
+
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{
+                fontFamily: "'Comic Sans MS', cursive",
+                fontWeight: 700,
+                color: 'var(--text-primary)',
+                display: 'block',
+                marginBottom: '0.75rem'
+              }}>
+                Graphics Quality
+              </label>
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                {['low', 'medium', 'high', 'ultra'].map(quality => (
+                  <button
+                    key={quality}
+                    onClick={() => handleSelect('graphics', 'quality', quality)}
+                    className={settings.graphics?.quality === quality ? 'cartoony-btn' : 'cartoony-btn cartoony-btn-secondary'}
+                    style={{
+                      fontSize: '1rem',
+                      padding: '0.75rem 1.5rem',
+                      textTransform: 'capitalize'
+                    }}
+                  >
+                    {quality}
+                  </button>
+                ))}
+              </div>
+              <p style={{
+                fontSize: '0.875rem',
+                color: 'var(--text-secondary)',
+                marginTop: '0.5rem'
+              }}>
+                {settings.graphics?.quality === 'low' && '⚡ Best performance, minimal effects'}
+                {settings.graphics?.quality === 'medium' && '⚖️ Balanced quality and performance'}
+                {settings.graphics?.quality === 'high' && '✨ High quality visuals'}
+                {settings.graphics?.quality === 'ultra' && '🎮 Maximum quality for powerful devices'}
+              </p>
+            </div>
+
+            <ToggleSwitch
+              label="Show FPS Counter"
+              checked={settings.graphics?.showFPS || false}
+              category="graphics"
+              keyName="showFPS"
+            />
+            
+            <ToggleSwitch
+              label="Particle Effects"
+              checked={settings.graphics?.particles !== false}
+              category="graphics"
+              keyName="particles"
+            />
+            
+            <ToggleSwitch
+              label="Smooth Animations"
+              checked={settings.graphics?.smoothAnimations !== false}
+              category="graphics"
+              keyName="smoothAnimations"
+            />
+
+            <SliderControl
+              label="Render Scale"
+              value={settings.graphics?.renderScale || 100}
+              min={50}
+              max={150}
+              category="graphics"
+              keyName="renderScale"
+            />
+
+            <div style={{
+              marginTop: '1.5rem',
+              padding: '1rem',
+              background: 'var(--bg-pattern)',
+              borderRadius: 'var(--radius-md)',
+              border: '3px solid var(--border-color)'
+            }}>
+              <h4 style={{
+                fontFamily: "'Comic Sans MS', cursive",
+                fontWeight: 700,
+                marginBottom: '0.5rem',
+                color: 'var(--text-primary)'
+              }}>💻 Device Info</h4>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                CPU Cores: {navigator.hardwareConcurrency || 'Unknown'}
+              </p>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                Screen: {window.screen.width}x{window.screen.height}
+              </p>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                Memory: {(navigator as any).deviceMemory ? `${(navigator as any).deviceMemory}GB` : 'Unknown'}
+              </p>
             </div>
           </div>
         );

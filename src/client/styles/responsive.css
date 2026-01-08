@@ -162,6 +162,32 @@ textarea,
     grid-template-columns: 1fr !important;
   }
 
+  /* GamePlay header and actions */
+  .gameplay-header {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .gameplay-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .gameplay-actions button {
+    flex: 1 1 140px;
+    min-width: 140px;
+  }
+
+  .mobile-action-bar {
+    right: 12px !important;
+    bottom: 200px !important;
+  }
+
+  .mobile-action-bar button {
+    min-width: 104px !important;
+  }
+
   /* Hide decorative elements on mobile */
   .decoration,
   .floating-icon {

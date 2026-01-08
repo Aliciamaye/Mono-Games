@@ -1,4 +1,5 @@
 import express from 'express';
+import http from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -12,6 +13,8 @@ import gameRoutes from './routes/games.js';
 import leaderboardRoutes from './routes/leaderboard.js';
 import achievementRoutes from './routes/achievements.js';
 import saveRoutes from './routes/saves.js';
+import sessionRoutes from './routes/sessions.js';
+import statisticsRoutes from './routes/statistics.js';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler.js';
@@ -19,10 +22,14 @@ import { requestLogger } from './middleware/logger.js';
 import { cacheMiddleware, getCacheStats } from './middleware/cache.js';
 import { adaptiveRateLimit, rateLimiters } from './middleware/advancedRateLimit.js';
 
+// Import services
+import realtimeManager from './services/realtimeManager.js';
+
 // Load environment variables
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
 
 // Trust proxy for rate limiting behind proxies
@@ -97,6 +104,8 @@ app.use('/api/games', gameRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/saves', saveRoutes);
+app.use('/api/sessions', sessionRoutes);
+app.use('/api/statistics', statisticsRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -109,11 +118,16 @@ app.use('*', (req, res) => {
 // Error handling middleware
 app.use(errorHandler);
 
+// Initialize WebSocket server
+realtimeManager.initialize(server);
+console.log('🔌 WebSocket server initialized');
+
 // Start server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌐 CORS enabled for: ${corsOptions.origin}`);
+  console.log(`⚡ WebSocket server ready on ws://localhost:${PORT}/ws`);
 });
 
 // Handle unhandled rejections

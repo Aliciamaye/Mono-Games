@@ -32,6 +32,5 @@
       "@services/*": ["./src/client/services/*"]
     }
   },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src"]
 }

@@ -4,7 +4,7 @@ import achievementService from '../services/achievementService';
 import { PREMIUM_GAMES, isPremiumGame, isGameUnlocked, unlockGame, getPremiumGame } from '../config/premiumGames';
 import type React from 'react';
 
-const PremiumGameStore: React.FC = () => {
+function PremiumGameStore() {
     const [diamonds, setDiamonds] = useState(0);
     const [unlockedGames, setUnlockedGames] = useState<string[]>([]);
     const [selectedGame, setSelectedGame] = useState<string | null>(null);
@@ -148,7 +148,7 @@ const PremiumGameStore: React.FC = () => {
                     marginBottom: '1rem'
                 }}>
                     ⭐⭐⭐ Tier 3 - Premium 3D Games (Only 150 💎!)
-                </h3>        </h3>
+                </h3>
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
@@ -165,7 +165,6 @@ const PremiumGameStore: React.FC = () => {
                 ))}
             </div>
         </div>
-        </div >
     );
 };
 
@@ -326,6 +325,6 @@ const GameCard: React.FC<{
             )}
         </div>
     );
-};
+}
 
 export default PremiumGameStore;

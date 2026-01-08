@@ -1,5 +1,6 @@
 import BaseGame from '../../shared/framework/BaseGame.js';
 import { getAI, AI_LEVELS } from '../../shared/AIOpponent.js';
+import useSettingsStore from '../../../store/settingsStore';
 
 /**
  * Classic Pong Game with AI and Local Multiplayer
@@ -8,8 +9,10 @@ class PongGame extends BaseGame {
   constructor(containerId) {
     super(containerId, 'pong', 800, 500);
 
-    this.ai = getAI(3);
-    this.aiLevel = 3;
+    // Get settings
+    const settings = useSettingsStore.getState().settings;
+    this.aiLevel = settings.gameplay.aiLevel || 3;
+    this.ai = getAI(this.aiLevel);
 
     // Game mode: 'ai' or 'local'
     this.gameMode = 'local';

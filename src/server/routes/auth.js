@@ -4,6 +4,8 @@ import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import { db } from '../utils/db.js';
 import { validateRequest } from '../middleware/validation.js';
+import { auth } from '../middleware/auth.js';
+import tokenManager from '../services/tokenManager.js';
 
 const router = express.Router();
 
@@ -53,8 +55,8 @@ router.post('/register', validateRequest(registerSchema), async (req, res, next)
       created_at: new Date().toISOString()
     });
 
-    // Generate token
-    const token = generateToken(user.id);
+    // Generate token pair
+    const tokens = tokenManager.generateTokenPair(user.id, user.email, user.username);
 
     res.status(201).json({
       success: true,
@@ -65,7 +67,7 @@ router.post('/register', validateRequest(registerSchema), async (req, res, next)
           username: user.username,
           email: user.email
         },
-        token
+        ...tokens
       }
     });
   } catch (error) {
@@ -96,8 +98,8 @@ router.post('/login', validateRequest(loginSchema), async (req, res, next) => {
       });
     }
 
-    // Generate token
-    const token = generateToken(user.id);
+    // Generate token pair
+    const tokens = tokenManager.generateTokenPair(user.id, user.email, user.username);
 
     res.json({
       success: true,
@@ -109,7 +111,7 @@ router.post('/login', validateRequest(loginSchema), async (req, res, next) => {
           email: user.email,
           avatar: user.avatar
         },
-        token
+        ...tokens
       }
     });
   } catch (error) {
@@ -159,11 +161,75 @@ router.get('/verify', async (req, res, next) => {
 });
 
 // Logout (client-side token removal, but we can track it)
-router.post('/logout', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Logged out successfully'
-  });
+router.post('/logout', auth, (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    
+    // Blacklist the access token
+    if (token) {
+      tokenManager.blacklistToken(token);
+    }
+
+    res.json({
+      success: true,
+      message: 'Logged out successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Logout failed'
+    });
+  }
+});
+
+// Refresh access token
+const refreshSchema = z.object({
+  refreshToken: z.string()
+});
+
+router.post('/refresh', validateRequest(refreshSchema), async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    const result = await tokenManager.refreshAccessToken(refreshToken);
+
+    if (!result.success) {
+      return res.status(401).json({
+        success: false,
+        message: result.error || 'Invalid refresh token'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        accessToken: result.accessToken,
+        expiresIn: result.expiresIn
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Token refresh failed'
+    });
+  }
+});
+
+// Revoke all tokens (logout from all devices)
+router.post('/revoke-all', auth, (req, res) => {
+  try {
+    tokenManager.revokeAllUserTokens(req.user.id);
+
+    res.json({
+      success: true,
+      message: 'All sessions revoked'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to revoke sessions'
+    });
+  }
 });
 
 export default router;

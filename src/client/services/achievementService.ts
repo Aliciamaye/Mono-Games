@@ -243,6 +243,14 @@ class AchievementService {
         return this.diamonds;
     }
 
+    // Add diamonds (e.g. from gameplay)
+    async addDiamonds(amount: number, source: string): Promise<number> {
+        this.diamonds += Math.floor(amount);
+        await this.saveDiamonds();
+        console.log(`[AchievementService] Added ${amount} diamonds from ${source}. New balance: ${this.diamonds}`);
+        return this.diamonds;
+    }
+
     // Spend diamonds
     async spendDiamonds(amount: number, reason: string): Promise<boolean> {
         if (this.diamonds < amount) {

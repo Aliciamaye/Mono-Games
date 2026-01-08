@@ -148,6 +148,32 @@ export const CORE_GAMES: Game[] = [
         controls: ['Mouse']
     },
     {
+        id: 'infinite-roads',
+        name: 'Infinite Roads',
+        description: 'Relaxing 3D infinite driving with dynamic weather and day/night cycle',
+        category: 'Simulation',
+        difficulty: 'easy',
+        isPremium: false,
+        isInstalled: true,
+        is3D: true,
+        thumbnail: '🚗',
+        features: ['Infinite Procedural Roads', 'Day/Night Cycle', 'Weather System', 'Smooth Camera', '3D Graphics'],
+        controls: ['A/D or Arrow Keys', 'Touch Controls']
+    },
+    {
+        id: 'match-3',
+        name: 'Match-3 Gems',
+        description: 'Classic gem-matching puzzle with cascades and combos',
+        category: 'Puzzle',
+        difficulty: 'easy',
+        isPremium: false,
+        isInstalled: true,
+        is3D: false,
+        thumbnail: '💎',
+        features: ['Cascade Matching', 'Combo System', 'Move Counter', 'Score Target'],
+        controls: ['Mouse Click']
+    },
+    {
         id: 'doodle-jump',
         name: 'Doodle Jump',
         description: 'Jump your way to the top',
