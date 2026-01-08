@@ -28,7 +28,8 @@ const GameLauncher: React.FC = () => {
   const navigate = useNavigate();
   const { installedGames, loadGames, isLoading } = useGameStore();
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [filter, setFilter] = useState<string>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('name');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
@@ -54,19 +55,47 @@ const GameLauncher: React.FC = () => {
     icon: getGameIcon(game.id),
   }));
 
-  const filteredGames = allGames.filter((game) => {
-    const matchesSearch = game.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         game.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter =
-      filter === 'all' ||
-      (filter === 'featured' && game.featured) ||
-      (filter === 'new' && game.new) ||
-      (filter === 'hot' && game.hot) ||
-      (filter === '3d' && game.renderer === 'three') ||
-      (filter === 'multiplayer' && game.multiplayer) ||
-      (filter === game.category);
-    return matchesSearch && matchesFilter;
-  });
+  // Enhanced filtering and sorting
+  const filteredGames = allGames
+    .filter((game) => {
+      const matchesSearch = game.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           game.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           game.category?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesCategory =
+        categoryFilter === 'all' ||
+        categoryFilter === game.category ||
+        (categoryFilter === 'core' && ['arcade', 'puzzle', 'sports'].includes(game.category)) ||
+        (categoryFilter === 'premium' && game.premium) ||
+        (categoryFilter === 'chill' && game.chill);
+      
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return a.name.localeCompare(b.name);
+        case 'rating':
+          return (b.rating || 0) - (a.rating || 0);
+        case 'difficulty':
+          const diffOrder = { 'easy': 1, 'medium': 2, 'hard': 3, 'expert': 4 };
+          return (diffOrder[a.difficulty] || 0) - (diffOrder[b.difficulty] || 0);
+        case 'newest':
+          return (b.releaseDate || 0) - (a.releaseDate || 0);
+        default:
+          return 0;
+      }
+    });
+
+  // Category stats
+  const categoryStats = {
+    all: allGames.length,
+    arcade: allGames.filter(g => g.category === 'arcade').length,
+    puzzle: allGames.filter(g => g.category === 'puzzle').length,
+    racing: allGames.filter(g => g.category === 'racing').length,
+    premium: allGames.filter(g => g.premium).length,
+    chill: allGames.filter(g => g.chill).length,
+  };
 
   const handlePlayGame = (gameId) => {
     navigate(`/play/${gameId}`);
@@ -105,90 +134,201 @@ const GameLauncher: React.FC = () => {
           {/* Search & Filters */}
           <div className="cartoony-card" style={{
             padding: '1.5rem',
-            marginBottom: '2rem'
+            marginBottom: '2rem',
+            background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+            border: '4px solid #d97706'
           }}>
+            {/* Category Pills */}
             <div style={{
               display: 'flex',
-              gap: '1rem',
+              gap: '0.75rem',
               flexWrap: 'wrap',
-              alignItems: 'flex-end'
+              marginBottom: '1.5rem',
+              justifyContent: 'center'
+            }}>
+              {[
+                { id: 'all', label: '🎮 All', count: categoryStats.all },
+                { id: 'arcade', label: '👾 Arcade', count: categoryStats.arcade },
+                { id: 'puzzle', label: '🧩 Puzzle', count: categoryStats.puzzle },
+                { id: 'racing', label: '🏎️ Racing', count: categoryStats.racing },
+                { id: 'premium', label: '💎 Premium', count: categoryStats.premium },
+                { id: 'chill', label: '🧘 Chill', count: categoryStats.chill }
+              ].map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setCategoryFilter(cat.id)}
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    borderRadius: '25px',
+                    border: categoryFilter === cat.id
+                      ? '4px solid #1f2937'
+                      : '4px solid transparent',
+                    background: categoryFilter === cat.id
+                      ? '#fff'
+                      : 'rgba(255,255,255,0.3)',
+                    color: categoryFilter === cat.id ? '#1f2937' : '#fff',
+                    fontFamily: "'Comic Sans MS', cursive",
+                    fontWeight: 'bold',
+                    fontSize: '1rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    boxShadow: categoryFilter === cat.id
+                      ? '0 4px 12px rgba(0,0,0,0.2)'
+                      : 'none',
+                    transform: categoryFilter === cat.id ? 'scale(1.05)' : 'scale(1)'
+                  }}
+                  onMouseOver={(e) => {
+                    if (categoryFilter !== cat.id) {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.5)';
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (categoryFilter !== cat.id) {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.3)';
+                    }
+                  }}
+                >
+                  {cat.label} <span style={{ 
+                    background: categoryFilter === cat.id ? '#f59e0b' : 'rgba(255,255,255,0.3)',
+                    padding: '2px 8px',
+                    borderRadius: '10px',
+                    marginLeft: '5px',
+                    fontSize: '0.85rem'
+                  }}>{cat.count}</span>
+                </button>
+              ))}
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '2fr 1fr 1fr auto',
+              gap: '1rem',
+              alignItems: 'end'
             }}>
               {/* Search */}
-              <div style={{ flex: 2, minWidth: '200px' }}>
+              <div>
                 <label style={{
                   fontFamily: "'Comic Sans MS', cursive",
                   fontWeight: 700,
                   display: 'block',
                   marginBottom: '0.5rem',
-                  color: 'var(--text-primary)'
+                  color: '#fff',
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
                 }}>
-                  🔍 Search
+                  🔍 Search Games
                 </label>
                 <input
                   type="text"
-                  placeholder="Search games..."
+                  placeholder="Find your game..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="cartoony-input"
-                  style={{ width: '100%' }}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '12px',
+                    border: '3px solid #fff',
+                    fontFamily: "'Comic Sans MS', cursive",
+                    fontSize: '1rem',
+                    outline: 'none'
+                  }}
                 />
               </div>
 
-              {/* Filter */}
-              <div style={{ flex: 1, minWidth: '150px' }}>
+              {/* Sort By */}
+              <div>
                 <label style={{
                   fontFamily: "'Comic Sans MS', cursive",
                   fontWeight: 700,
                   display: 'block',
                   marginBottom: '0.5rem',
-                  color: 'var(--text-primary)'
+                  color: '#fff',
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
                 }}>
-                  🗂️ Filter
+                  📊 Sort By
                 </label>
                 <select
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                  className="cartoony-input"
-                  style={{ width: '100%' }}
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '12px',
+                    border: '3px solid #fff',
+                    fontFamily: "'Comic Sans MS', cursive",
+                    fontSize: '1rem',
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
                 >
-                  <option value="all">All Games</option>
-                  <option value="core">Core Games</option>
-                  <option value="downloaded">Downloaded</option>
+                  <option value="name">Name (A-Z)</option>
+                  <option value="rating">Highest Rated</option>
+                  <option value="difficulty">Difficulty</option>
+                  <option value="newest">Newest First</option>
                 </select>
+              </div>
+
+              {/* Results Count */}
+              <div style={{ textAlign: 'center' }}>
+                <div style={{
+                  background: '#fff',
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '12px',
+                  border: '3px solid #d97706'
+                }}>
+                  <div style={{
+                    fontFamily: "'Comic Sans MS', cursive",
+                    fontWeight: 'bold',
+                    fontSize: '1.5rem',
+                    color: '#1f2937'
+                  }}>
+                    {filteredGames.length}
+                  </div>
+                  <div style={{
+                    fontFamily: "'Comic Sans MS', cursive",
+                    fontSize: '0.75rem',
+                    color: '#6b7280'
+                  }}>
+                    Games
+                  </div>
+                </div>
               </div>
 
               {/* View Mode Toggle */}
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <button
                   onClick={() => setViewMode('grid')}
+                  title="Grid View"
                   style={{
                     width: '44px',
                     height: '44px',
-                    borderRadius: 'var(--radius-md)',
+                    borderRadius: '12px',
                     border: viewMode === 'grid'
-                      ? '3px solid var(--primary)'
-                      : '3px solid var(--border-color)',
-                    background: viewMode === 'grid' ? 'var(--primary)' : 'var(--bg-card)',
-                    color: viewMode === 'grid' ? 'white' : 'var(--text-primary)',
+                      ? '3px solid #1f2937'
+                      : '3px solid #fff',
+                    background: viewMode === 'grid' ? '#fff' : 'rgba(255,255,255,0.3)',
+                    color: viewMode === 'grid' ? '#1f2937' : '#fff',
                     fontSize: '1.25rem',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
                   }}
                 >
                   ▦
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
+                  title="List View"
                   style={{
                     width: '44px',
                     height: '44px',
-                    borderRadius: 'var(--radius-md)',
+                    borderRadius: '12px',
                     border: viewMode === 'list'
-                      ? '3px solid var(--primary)'
-                      : '3px solid var(--border-color)',
-                    background: viewMode === 'list' ? 'var(--primary)' : 'var(--bg-card)',
-                    color: viewMode === 'list' ? 'white' : 'var(--text-primary)',
+                      ? '3px solid #1f2937'
+                      : '3px solid #fff',
+                    background: viewMode === 'list' ? '#fff' : 'rgba(255,255,255,0.3)',
+                    color: viewMode === 'list' ? '#1f2937' : '#fff',
                     fontSize: '1.25rem',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
                   }}
                 >
                   ≡
