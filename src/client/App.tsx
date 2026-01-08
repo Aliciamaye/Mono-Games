@@ -20,6 +20,7 @@ const GameStore = lazy(() => import('./pages/GameStore'));
 const PremiumGameStore = lazy(() => import('./components/PremiumGameStore') as any);
 const Help = lazy(() => import('./pages/Help'));
 const About = lazy(() => import('./pages/About'));
+const Changelog = lazy(() => import('./pages/Changelog'));
 import Profile from './pages/Profile';
 
 // Layout
@@ -201,6 +202,7 @@ const AppContent: React.FC = () => {
             <Route path="/premium-store" element={<PremiumGameStore />} />
             <Route path="/help" element={<Help />} />
             <Route path="/about" element={<About />} />
+            <Route path="/changelog" element={<Changelog />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<Navigate to="/launcher" replace />} />
           </Routes>
