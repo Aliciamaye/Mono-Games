@@ -253,7 +253,11 @@ export default class InfiniteRoads {
       'moonLight',
       new BABYLON.Vector3(0, 50, -50),
       this.scene
-    );AAA graphics
+    );
+    this.moonLight.intensity = 0;
+    this.moonLight.diffuse = new BABYLON.Color3(0.7, 0.8, 1.0);
+
+    // Post-processing pipeline for AAA graphics
     this.defaultPipeline = new BABYLON.DefaultRenderingPipeline(
       'defaultPipeline',
       true,
