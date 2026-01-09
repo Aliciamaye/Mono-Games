@@ -248,6 +248,7 @@ export default class CampfireSimulator {
       stones.push(stone);
     }
     
+    // Enhanced fire mesh with multiple layers for realistic flames
     this.fire = BABYLON.MeshBuilder.CreateCylinder('fire', { 
       diameterTop: 0, 
       diameterBottom: 1.2, 
@@ -255,11 +256,36 @@ export default class CampfireSimulator {
     }, this.scene);
     this.fire.position.y = 1.25;
     
+    // Inner fire core (bright orange-white)
     const fireMat = new BABYLON.StandardMaterial('fireMat', this.scene);
-    fireMat.emissiveColor = new BABYLON.Color3(1.0, 0.5, 0.1);
+    fireMat.emissiveColor = new BABYLON.Color3(1.0, 0.7, 0.2);
     fireMat.diffuseColor = new BABYLON.Color3(1.0, 0.4, 0.0);
-    fireMat.alpha = 0.8;
+    fireMat.alpha = 0.85;
     this.fire.material = fireMat;
+    
+    // Outer fire layer (red-orange glow)
+    const outerFire = BABYLON.MeshBuilder.CreateCylinder('outerFire', {
+      diameterTop: 0,
+      diameterBottom: 1.4,
+      height: 2.7
+    }, this.scene);
+    outerFire.position.y = 1.25;
+    const outerMat = new BABYLON.StandardMaterial('outerFireMat', this.scene);
+    outerMat.emissiveColor = new BABYLON.Color3(1.0, 0.3, 0.0);
+    outerMat.diffuseColor = new BABYLON.Color3(0.8, 0.2, 0.0);
+    outerMat.alpha = 0.5;
+    outerFire.material = outerMat;
+    
+    // Fire base glow (subtle ambient)
+    const baseGlow = BABYLON.MeshBuilder.CreateCylinder('baseGlow', {
+      diameter: 2.0,
+      height: 0.2
+    }, this.scene);
+    baseGlow.position.y = 0.1;
+    const glowMat = new BABYLON.StandardMaterial('glowMat', this.scene);
+    glowMat.emissiveColor = new BABYLON.Color3(1.0, 0.4, 0.0);
+    glowMat.alpha = 0.3;
+    baseGlow.material = glowMat;
     
     for (let i = 0; i < 6; i++) {
       const log = this.createLog();
@@ -269,45 +295,87 @@ export default class CampfireSimulator {
       log.position.y = 0.3;
       log.rotation.y = angle + Math.PI / 2;
       log.rotation.x = (Math.random() - 0.5) * 0.3;
+      
+      // Add glow map to log ends based on fire intensity
+      const logGlow = new BABYLON.GlowLayer('logGlow', this.scene);
+      logGlow.intensity = 0.8;
+      
       this.logs.push(log);
     }
   }
 
   private createLog(): BABYLON.Mesh {
-    // Main log cylinder
+    // Main log cylinder with detailed texture
     const log = BABYLON.MeshBuilder.CreateCylinder('log', { 
       diameter: 0.35, 
       height: 2.5,
-      tessellation: 16
+      tessellation: 20
     }, this.scene);
     
-    // Bark texture material
+    // Bark texture material with more detail
     const mat = new BABYLON.StandardMaterial('logMat', this.scene);
     mat.diffuseColor = new BABYLON.Color3(0.32, 0.22, 0.12);
     mat.specularColor = new BABYLON.Color3(0.1, 0.08, 0.05);
     mat.specularPower = 8;
-    mat.bumpTexture = null; // Would add bark normal map here
     log.material = mat;
     
-    // Add charred/burnt ends
-    const endMat = new BABYLON.StandardMaterial('burnedMat', this.scene);
-    endMat.diffuseColor = new BABYLON.Color3(0.1, 0.08, 0.06);
-    endMat.emissiveColor = new BABYLON.Color3(0.3, 0.1, 0.0);
+    // Add charred/glowing burnt ends that change with fire intensity
+    const burnedMat = new BABYLON.StandardMaterial('burnedMat', this.scene);
+    burnedMat.diffuseColor = new BABYLON.Color3(0.1, 0.08, 0.06);
+    burnedMat.emissiveColor = new BABYLON.Color3(0.8, 0.25, 0.05); // Glowing embers
+    burnedMat.specularPower = 2;
     
-    // Top end (charred)
+    // Top end (charred and glowing)
     const topEnd = BABYLON.MeshBuilder.CreateCylinder('topEnd', {
-      diameter: 0.36,
+      diameter: 0.37,
+      height: 0.2
+    }, this.scene);
+    topEnd.position.y = 1.35;
+    topEnd.material = burnedMat;
+    
+    // Add inner glow ring (visible hot coals)
+    const innerGlow = BABYLON.MeshBuilder.CreateCylinder('innerGlow', {
+      diameter: 0.3,
       height: 0.15
     }, this.scene);
-    topEnd.position.y = 1.3;
-    topEnd.material = endMat;
+    innerGlow.position.y = 1.35;
+    const innerMat = new BABYLON.StandardMaterial('innerGlowMat', this.scene);
+    innerMat.emissiveColor = new BABYLON.Color3(1.0, 0.4, 0.0);
+    innerMat.alpha = 0.7;
+    innerGlow.material = innerMat;
     
-    // Bottom end (charred)
+    // Bottom end (charred and glowing)
     const bottomEnd = topEnd.clone('bottomEnd');
-    bottomEnd.position.y = -1.3;
+    bottomEnd.position.y = -1.35;
     
-    // Merge all parts
-    const fullLog = BABYLON.Mesh.MergeMeshes([log, topEnd, bottomEnd], true)!;
+    const bottomGlow = innerGlow.clone('bottomGlow');
+    bottomGlow.position.y = -1.35;
+    
+    // Add burn cracks/lines effect
+    for (let i = 0; i < 3; i++) {
+      const crack = BABYLON.MeshBuilder.CreateCylinder('crack', {
+        diameter: 0.05,
+        height: 0.8
+      }, this.scene);
+      const angle = (i / 3) * Math.PI * 2;
+      crack.position.x = Math.cos(angle) * 0.16;
+      crack.position.z = Math.sin(angle) * 0.16;
+      crack.position.y = 0.5 + (Math.random() - 0.5) * 0.4;
+      crack.rotation.x = Math.PI / 2;
+      crack.rotation.z = angle;
+      const crackMat = new BABYLON.StandardMaterial('crackMat', this.scene);
+      crackMat.emissiveColor = new BABYLON.Color3(0.9, 0.3, 0.0);
+      crackMat.alpha = 0.6;
+      crack.material = crackMat;
+    }
+    
+    // Merge all parts into one mesh
+    const allParts = [log, topEnd, innerGlow, bottomEnd, bottomGlow];
+    const fullLog = BABYLON.Mesh.MergeMeshes(allParts, true)!;
+    
+    // Add metadata for animation
+    fullLog.metadata = { burnProgress: 0, glowIntensity: 1.0 };
+    
     return fullLog;
   }
 
@@ -532,11 +600,65 @@ export default class CampfireSimulator {
     this.info.timeSpentRelaxing += dt;
     this.timeOfNight += dt * 0.01;
     
+    // Fire intensity decreases over time
     this.fireIntensity = Math.max(0, this.fireIntensity - dt * 0.5);
     this.fire.scaling.y = 0.5 + (this.fireIntensity / 100) * 0.5;
     this.fireParticles.emitRate = 50 + (this.fireIntensity / 100) * 150;
     
+    // Animate fire with rotation and color pulsing
     this.fire.rotation.y += dt * 0.5;
+    const fireMat = this.fire.material as BABYLON.StandardMaterial;
+    if (fireMat) {
+      // Pulse fire color based on intensity
+      const pulse = Math.sin(Date.now() * 0.003) * 0.1 + 0.9;
+      const intensityFactor = this.fireIntensity / 100;
+      fireMat.emissiveColor = new BABYLON.Color3(
+        1.0 * pulse * intensityFactor,
+        (0.7 + pulse * 0.3) * intensityFactor,
+        0.2 * intensityFactor
+      );
+    }
+    
+    // Update wood burning - logs glow brighter when fire is strong
+    for (const log of this.logs) {
+      if (log.metadata) {
+        // Burn progress increases faster when fire is hot
+        log.metadata.burnProgress += dt * 0.02 * (this.fireIntensity / 100);
+        log.metadata.glowIntensity = Math.max(0.3, this.fireIntensity / 100);
+        
+        // Update log material emission based on fire intensity
+        const logMat = log.material as BABYLON.StandardMaterial;
+        if (logMat && logMat.name === 'burnedMat') {
+          logMat.emissiveColor = new BABYLON.Color3(
+            0.8 * log.metadata.glowIntensity,
+            0.25 * log.metadata.glowIntensity,
+            0.05 * log.metadata.glowIntensity
+          );
+        }
+        
+        // Logs slowly shrink as they burn
+        if (log.metadata.burnProgress > 0.5) {
+          const shrinkFactor = 1.0 - (log.metadata.burnProgress - 0.5) * 0.3;
+          log.scaling.set(shrinkFactor, shrinkFactor, shrinkFactor);
+        }
+      }
+    }
+    
+    // Update outer fire layers
+    const outerFire = this.scene.getMeshByName('outerFire');
+    if (outerFire) {
+      outerFire.scaling.y = 0.5 + (this.fireIntensity / 100) * 0.5;
+      outerFire.rotation.y += dt * 0.7; // Rotate faster than inner fire
+    }
+    
+    const baseGlow = this.scene.getMeshByName('baseGlow');
+    if (baseGlow) {
+      const glowMat = baseGlow.material as BABYLON.StandardMaterial;
+      if (glowMat) {
+        const glowPulse = Math.sin(Date.now() * 0.005) * 0.2 + 0.8;
+        glowMat.alpha = 0.3 * (this.fireIntensity / 100) * glowPulse;
+      }
+    }
     
     this.moonPhase = (this.moonPhase + dt * 0.01) % 1;
     const phases = ['New Moon', 'Waxing Crescent', 'First Quarter', 'Waxing Gibbous', 'Full Moon', 'Waning Gibbous', 'Last Quarter', 'Waning Crescent'];

@@ -35,7 +35,7 @@ export class Renderer2D {
     }
 
     // Layer management
-    createLayer(id, z Index = 0) {
+    createLayer(id, z index = 0) {
         this.layers.set(id, {
             zIndex,
             canvas: document.createElement('canvas'),
