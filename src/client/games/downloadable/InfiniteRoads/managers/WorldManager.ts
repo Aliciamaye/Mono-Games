@@ -13,7 +13,7 @@ import type { BiomeType, RoadSegment, TerrainChunk, GameSettings } from '../type
 
 export class WorldManager {
   private scene: BABYLON.Scene;
-  private settings: GameSettings;
+  // Reserved for future: settings property
   
   // Road
   private roadSegments: RoadSegment[] = [];
@@ -74,9 +74,8 @@ export class WorldManager {
     }
   };
 
-  constructor(scene: BABYLON.Scene, settings: GameSettings) {
+  constructor(scene: BABYLON.Scene, _settings: GameSettings) {
     this.scene = scene;
-    this.settings = settings;
   }
 
   async initialize(): Promise<void> {

@@ -80,7 +80,7 @@ export default class ZenGarden {
   
   // Particles
   private cherryBlossomParticles!: BABYLON.ParticleSystem;
-  private waterfallParticles!: BABYLON.ParticleSystem;
+  // Reserved for future: private waterfallParticles!: BABYLON.ParticleSystem;
   
   // State
   private isRunning: boolean = false;

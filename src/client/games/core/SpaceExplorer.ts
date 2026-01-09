@@ -38,23 +38,24 @@ export default class SpaceExplorer {
   
   // Menu System
   private menu!: SpaceExplorerMenu;
-  private _gameSettings: GameSettings = {
-    graphics: 'high',
-    shadows: false,
-    particles: true,
-    postProcessing: true,
-    antialiasing: true,
-    volume: 0.7,
-    musicVolume: 0.5,
-    sfxVolume: 0.8
-  };
+  // Settings stored but not actively read after initialization
+  // private _gameSettings: GameSettings = {
+  //   graphics: 'high',
+  //   shadows: false,
+  //   particles: true,
+  //   postProcessing: true,
+  //   antialiasing: true,
+  //   volume: 0.7,
+  //   musicVolume: 0.5,
+  //   sfxVolume: 0.8
+  // };
   private gameStarted: boolean = false;
   private isPaused: boolean = false;
   private isRunning: boolean = false;
   
   private ship!: BABYLON.Mesh;
   private shipSpeed: number = 0;
-  private shipVelocity: BABYLON.Vector3 = BABYLON.Vector3.Zero();
+  // private shipVelocity: BABYLON.Vector3 = BABYLON.Vector3.Zero(); // Reserved for physics
   private maxSpeed: number = 50;
   
   // Ship Upgrades & Customization
@@ -69,7 +70,7 @@ export default class SpaceExplorer {
   
   private spaceObjects: SpaceObject[] = [];
   private nebulae: BABYLON.Mesh[] = [];
-  private stars: BABYLON.PointLight[] = [];
+  // private stars: BABYLON.PointLight[] = []; // Reserved for star lights
   
   // Black Holes & Wormholes
   private blackHoles: BABYLON.Mesh[] = [];
@@ -86,7 +87,7 @@ export default class SpaceExplorer {
   // Alien Encounters
   private alienShips: BABYLON.Mesh[] = [];
   private spaceWhales: BABYLON.Mesh[] = [];
-  private _alienEncounterTimer: number = 0;
+  // Reserved for future: _alienEncounterTimer
   
   // Space Anomalies
   private anomalies: BABYLON.Mesh[] = [];
@@ -1183,7 +1184,7 @@ export default class SpaceExplorer {
     
     if (!this.freeCamMode) {
       // Apply speed upgrade
-      const upgradedMaxSpeed = 50 + (this.speedUpgradeLevel * 10);
+      this.maxSpeed = 50 + (this.speedUpgradeLevel * 10);
       
       if (this.keys['w'] || this.keys['arrowup']) {
         this.shipSpeed = Math.min(this.shipSpeed + 20 * dt, this.maxSpeed);
@@ -1441,7 +1442,7 @@ export default class SpaceExplorer {
 
   // Menu System Methods
   private startGame(settings: GameSettings): void {
-    this._gameSettings = settings;
+    // Apply settings directly without storing
     this.applySettings(settings);
     
     // Show HUD
@@ -1464,7 +1465,7 @@ export default class SpaceExplorer {
   }
   
   private applySettings(settings: GameSettings): void {
-    this._gameSettings = settings;
+    // Settings applied directly without storing
     
     // Apply particle settings
     // nebulae particles handled in updateNearbyObjects

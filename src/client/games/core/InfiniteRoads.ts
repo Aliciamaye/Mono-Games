@@ -76,11 +76,11 @@ export default class InfiniteRoads {
   private carPosition: number = 0; // -1 to 1 (left to right)
   private carRotation: number = 0;
   private carTilt: number = 0; // For bike leaning
-  private _driftPower: number = 0;
+  // private _driftPower: number = 0; // Reserved for future drift mechanics
   
   // Physics
-  private _velocity: BABYLON.Vector3 = BABYLON.Vector3.Zero();
-  private _suspension: number = 0;
+  // private _velocity: BABYLON.Vector3 = BABYLON.Vector3.Zero(); // Reserved for physics
+  // private _suspension: number = 0; // Reserved for suspension
   private wheelRotation: number = 0;
   private wheels: BABYLON.Mesh[] = [];
   
@@ -108,7 +108,7 @@ export default class InfiniteRoads {
   // Bridges & Tunnels 🌉
   private bridges: BABYLON.Mesh[] = [];
   private tunnels: BABYLON.Mesh[] = [];
-  private inTunnel: boolean = false;
+  // private inTunnel: boolean = false; // Reserved for tunnel logic
   private bridgeChance: number = 0.03; // 3% chance per segment
   private tunnelChance: number = 0.02; // 2% chance per segment
   
@@ -149,7 +149,7 @@ export default class InfiniteRoads {
   private tireScreechSound!: BABYLON.Sound;
   private biomeAmbience!: BABYLON.Sound;
   private radioSound!: BABYLON.Sound;
-  private baseEngineFrequency: number = 1.0;
+  // private baseEngineFrequency: number = 1.0; // Reserved for audio
   private radioStations: string[] = [
     'Chill Beats Radio',
     'Highway Jazz',
@@ -172,9 +172,9 @@ export default class InfiniteRoads {
   
   // Effects & Scenery
   private clouds: BABYLON.Mesh[] = [];
-  private wildlife: BABYLON.Mesh[] = [];
-  private buildings: BABYLON.Mesh[] = [];
-  private signs: BABYLON.Mesh[] = [];
+  // private wildlife: BABYLON.Mesh[] = []; // Reserved for future feature
+  // private buildings: BABYLON.Mesh[] = []; // Reserved for future feature
+  // private signs: BABYLON.Mesh[] = []; // Reserved for future feature
   
   // State
   private isRunning: boolean = false;
@@ -192,8 +192,8 @@ export default class InfiniteRoads {
   
   
   // Camera
-  private cameraViews: Array<{ name: string; alpha: number; beta: number; radius: number; }> = [];
-  private currentCameraView: number = 0;
+  // Reserved for future: cameraViews array
+  // private currentCameraView: number = 0; // Reserved
   
   // UI Info (NO SCORING - Just info for immersion)
   public info = {

@@ -350,15 +350,15 @@ export class InfiniteRoadsGame {
     this.cameraManager.zoom(e.deltaY > 0 ? 1 : -1);
   }
 
-  private handleTouchStart(e: TouchEvent): void {
+  private handleTouchStart(_e: TouchEvent): void {
     // Touch controls handled by UIManager
   }
 
-  private handleTouchMove(e: TouchEvent): void {
+  private handleTouchMove(_e: TouchEvent): void {
     // Touch controls handled by UIManager
   }
 
-  private handleTouchEnd(e: TouchEvent): void {
+  private handleTouchEnd(_e: TouchEvent): void {
     // Touch controls handled by UIManager
   }
 

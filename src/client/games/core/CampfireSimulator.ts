@@ -28,16 +28,17 @@ export default class CampfireSimulator {
   
   // Menu System
   private menu!: CampfireSimulatorMenu;
-  private _gameSettings: GameSettings = {
-    graphics: 'high',
-    fireIntensity: 0.8,
-    particles: true,
-    postProcessing: true,
-    antialiasing: true,
-    volume: 0.7,
-    fireVolume: 0.8,
-    ambienceVolume: 0.6
-  };
+  // Settings stored but not actively read after initialization
+  // private _gameSettings: GameSettings = {
+  //   graphics: 'high',
+  //   fireIntensity: 0.8,
+  //   particles: true,
+  //   postProcessing: true,
+  //   antialiasing: true,
+  //   volume: 0.7,
+  //   fireVolume: 0.8,
+  //   ambienceVolume: 0.6
+  // };
   private gameStarted: boolean = false;
   private isPaused: boolean = false;
   private isRunning: boolean = false;
@@ -72,7 +73,7 @@ export default class CampfireSimulator {
   private cookingTimer: number = 0;
   
   // Ambient Audio
-  private _audioTimer: number = 0;
+  // private _audioTimer: number = 0; // Reserved for future audio timing
   private lastSoundTime: number = 0;
   
   private keys: { [key: string]: boolean } = {};
@@ -1027,27 +1028,7 @@ export default class CampfireSimulator {
     }
   }
   
-  // Cooking System
-  private startCooking(foodType: 'marshmallow' | 'hotdog' | 'coffee'): void {
-    this.isCooking = true;
-    this.cookingTimer = 5; // 5 seconds to cook
-    
-    if (foodType === 'coffee') {
-      const pot = BABYLON.MeshBuilder.CreateCylinder('coffeePot', {
-        diameter: 0.5,
-        height: 0.6
-      }, this.scene);
-      pot.position.set(1, 0.5, 0.5);
-      
-      const potMat = new BABYLON.StandardMaterial('potMat', this.scene);
-      potMat.diffuseColor = new BABYLON.Color3(0.2, 0.2, 0.25);
-      potMat.specularColor = new BABYLON.Color3(0.5, 0.5, 0.5);
-      pot.material = potMat;
-      
-      this.cookingItems.push(pot);
-      console.log('☕ Brewing coffee...');
-    }
-  }
+  // Reserved for future: startCooking method for campfire cooking feature
   
   private updateCooking(dt: number): void {
     if (this.isCooking && this.cookingTimer > 0) {
@@ -1072,7 +1053,7 @@ export default class CampfireSimulator {
 
   // Menu System Methods
   private startGame(settings: GameSettings): void {
-    this._gameSettings = settings;
+    // Apply settings directly without storing
     this.applySettings(settings);
     
     // Show HUD
@@ -1095,7 +1076,7 @@ export default class CampfireSimulator {
   }
   
   private applySettings(settings: GameSettings): void {
-    this._gameSettings = settings;
+    // Settings applied directly without storing
     
     // Apply fire intensity
     const fireLight = this.scene.getLightByName('fireLight') as BABYLON.PointLight;

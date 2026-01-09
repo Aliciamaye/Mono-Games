@@ -429,16 +429,7 @@ export class GitHubSyncService {
     return await this.syncToGitHub();
   }
 
-  /**
-   * Clear old local data after successful backup
-   */
-  private async clearOldLocalData(): Promise<void> {
-    // Only clear data older than 30 days
-    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-    
-    // Implementation depends on your data structure
-    console.log('🧹 Clearing old local data...');
-  }
+  // Reserved for future: clearOldLocalData method
 
   // ==================== HELPERS ====================
 
