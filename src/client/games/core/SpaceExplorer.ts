@@ -61,6 +61,11 @@ export default class SpaceExplorer {
   private nebulae: BABYLON.Mesh[] = [];
   private stars: BABYLON.PointLight[] = [];
   
+  // Black Holes & Wormholes
+  private blackHoles: BABYLON.Mesh[] = [];
+  private wormholes: BABYLON.Mesh[] = [];
+  private accretionDisks: BABYLON.ParticleSystem[] = [];
+  
   private keys: { [key: string]: boolean } = {};
   private freeCamMode: boolean = false;
   
@@ -305,6 +310,22 @@ export default class SpaceExplorer {
       else if (rand > 0.4) this.createAsteroidField(new BABYLON.Vector3(x, y, z));
       else if (rand > 0.25) this.createComet(new BABYLON.Vector3(x, y, z));
       else this.createSpaceStation(new BABYLON.Vector3(x, y, z));
+    }
+    
+    // Add black holes (rare)
+    for (let i = 0; i < 2; i++) {
+      const x = (Math.random() - 0.5) * 600;
+      const y = (Math.random() - 0.5) * 600;
+      const z = (Math.random() - 0.5) * 600;
+      this.createBlackHole(new BABYLON.Vector3(x, y, z));
+    }
+    
+    // Add wormholes (very rare)
+    for (let i = 0; i < 3; i++) {
+      const x = (Math.random() - 0.5) * 700;
+      const y = (Math.random() - 0.5) * 700;
+      const z = (Math.random() - 0.5) * 700;
+      this.createWormhole(new BABYLON.Vector3(x, y, z));
     }
     
     this.createStarfield();

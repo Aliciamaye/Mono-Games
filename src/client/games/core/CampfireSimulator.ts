@@ -53,6 +53,12 @@ export default class CampfireSimulator {
   private moonPhase: number = 0;
   private timeOfNight: number = 0;
   
+  // Wildlife & Effects
+  private wildlife: BABYLON.Mesh[] = [];
+  private auroraParticles!: BABYLON.ParticleSystem;
+  private auroraVisible: boolean = false;
+  private wildlifeTimer: number = 0;
+  
   private keys: { [key: string]: boolean } = {};
   
   public info = {
@@ -134,7 +140,11 @@ export default class CampfireSimulator {
     this.createForest();
     this.createStarfield();
     this.createMoon();
+    this.createNorthernLights();
     this.initializeParticles();
+    
+    // Initial wildlife spawn timer
+    this.wildlifeTimer = 10 + Math.random() * 20;
     
     const glow = new BABYLON.GlowLayer('glow', this.scene);
     glow.intensity = 0.8;
@@ -470,6 +480,160 @@ export default class CampfireSimulator {
     mat.diffuseColor = new BABYLON.Color3(0.9, 0.9, 1.0);
     moon.material = mat;
   }
+  
+  private createNorthernLights(): void {
+    // Aurora borealis particle system
+    this.auroraParticles = new BABYLON.ParticleSystem('aurora', 2000, this.scene);
+    this.auroraParticles.particleTexture = new BABYLON.Texture('', this.scene);
+    this.auroraParticles.emitter = new BABYLON.Vector3(0, 30, -30);
+    this.auroraParticles.minEmitBox = new BABYLON.Vector3(-60, 0, -10);
+    this.auroraParticles.maxEmitBox = new BABYLON.Vector3(60, 0, 10);
+    
+    // Slow downward drift
+    this.auroraParticles.direction1 = new BABYLON.Vector3(-0.5, -0.2, 0);
+    this.auroraParticles.direction2 = new BABYLON.Vector3(0.5, -0.1, 0);
+    
+    this.auroraParticles.minSize = 2;
+    this.auroraParticles.maxSize = 4;
+    this.auroraParticles.minLifeTime = 8;
+    this.auroraParticles.maxLifeTime = 15;
+    this.auroraParticles.emitRate = 100;
+    this.auroraParticles.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+    
+    // Green-purple aurora colors
+    this.auroraParticles.color1 = new BABYLON.Color4(0.2, 1.0, 0.4, 0.3);
+    this.auroraParticles.color2 = new BABYLON.Color4(0.6, 0.3, 1.0, 0.2);
+    this.auroraParticles.colorDead = new BABYLON.Color4(0, 0, 0, 0);
+    
+    this.auroraParticles.minEmitPower = 0.2;
+    this.auroraParticles.maxEmitPower = 0.5;
+    this.auroraParticles.gravity = new BABYLON.Vector3(0, -0.1, 0);
+    
+    // Start with aurora visible (random chance)
+    if (Math.random() > 0.5) {
+      this.auroraVisible = true;
+      this.auroraParticles.start();
+    }
+  }
+  
+  private spawnWildlife(): void {
+    const types = ['deer', 'rabbit', 'owl'];
+    const type = types[Math.floor(Math.random() * types.length)];
+    
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 15 + Math.random() * 10;
+    
+    let animal: BABYLON.Mesh;
+    
+    if (type === 'deer') {
+      // Simple deer shape
+      const body = BABYLON.MeshBuilder.CreateBox('deerBody', { width: 1, height: 1.5, depth: 2 }, this.scene);
+      const neck = BABYLON.MeshBuilder.CreateBox('deerNeck', { width: 0.5, height: 1, depth: 0.5 }, this.scene);
+      neck.position.y = 1.5;
+      neck.position.z = 0.8;
+      const head = BABYLON.MeshBuilder.CreateBox('deerHead', { width: 0.6, height: 0.8, depth: 0.6 }, this.scene);
+      head.position.y = 2.2;
+      head.position.z = 1.2;
+      
+      animal = BABYLON.Mesh.MergeMeshes([body, neck, head], true)!;
+      animal.position.y = 1.5;
+      
+      const mat = new BABYLON.StandardMaterial('deerMat', this.scene);
+      mat.diffuseColor = new BABYLON.Color3(0.5, 0.35, 0.25);
+      animal.material = mat;
+    } else if (type === 'rabbit') {
+      // Simple rabbit shape
+      const body = BABYLON.MeshBuilder.CreateSphere('rabbitBody', { diameter: 0.8 }, this.scene);
+      const head = BABYLON.MeshBuilder.CreateSphere('rabbitHead', { diameter: 0.5 }, this.scene);
+      head.position.y = 0.6;
+      head.position.z = 0.4;
+      
+      animal = BABYLON.Mesh.MergeMeshes([body, head], true)!;
+      animal.position.y = 0.5;
+      
+      const mat = new BABYLON.StandardMaterial('rabbitMat', this.scene);
+      mat.diffuseColor = new BABYLON.Color3(0.7, 0.65, 0.6);
+      animal.material = mat;
+    } else {
+      // Owl (flying)
+      animal = BABYLON.MeshBuilder.CreateSphere('owl', { diameter: 0.8 }, this.scene);
+      animal.position.y = 8 + Math.random() * 4;
+      
+      const mat = new BABYLON.StandardMaterial('owlMat', this.scene);
+      mat.diffuseColor = new BABYLON.Color3(0.4, 0.35, 0.3);
+      animal.material = mat;
+    }
+    
+    animal.position.x = Math.cos(angle) * distance;
+    animal.position.z = Math.sin(angle) * distance;
+    
+    // Add to wildlife list for animation
+    animal.metadata = { 
+      type, 
+      spawnTime: Date.now(),
+      angle,
+      distance,
+      bobOffset: Math.random() * Math.PI * 2
+    };
+    this.wildlife.push(animal);
+    
+    console.log(`🦌 ${type.charAt(0).toUpperCase() + type.slice(1)} appeared near the campfire!`);
+  }
+  
+  private updateWildlife(dt: number): void {
+    // Spawn wildlife occasionally
+    this.wildlifeTimer -= dt;
+    if (this.wildlifeTimer <= 0 && this.wildlife.length < 3) {
+      this.spawnWildlife();
+      this.wildlifeTimer = 20 + Math.random() * 40; // Every 20-60 seconds
+    }
+    
+    // Update existing wildlife
+    this.wildlife = this.wildlife.filter(animal => {
+      if (!animal.metadata) return false;
+      
+      const age = (Date.now() - animal.metadata.spawnTime) / 1000;
+      
+      // Despawn after 30 seconds
+      if (age > 30) {
+        animal.dispose();
+        return false;
+      }
+      
+      // Animate based on type
+      if (animal.metadata.type === 'deer' || animal.metadata.type === 'rabbit') {
+        // Slow walking animation
+        animal.position.x += Math.sin(age) * 0.02;
+        animal.position.z += Math.cos(age) * 0.02;
+        // Look at fire occasionally
+        const lookAtFire = Math.sin(age * 0.5) > 0.7;
+        if (lookAtFire) {
+          animal.lookAt(new BABYLON.Vector3(0, 1, 0));
+        }
+      } else if (animal.metadata.type === 'owl') {
+        // Flying in circles
+        animal.metadata.angle += dt * 0.2;
+        animal.position.x = Math.cos(animal.metadata.angle) * animal.metadata.distance;
+        animal.position.z = Math.sin(animal.metadata.angle) * animal.metadata.distance;
+        // Bob up and down
+        animal.metadata.bobOffset += dt * 2;
+        animal.position.y = 8 + Math.sin(animal.metadata.bobOffset) * 1;
+      }
+      
+      return true;
+    });
+    
+    // Toggle aurora randomly
+    if (Math.random() < 0.001) {
+      this.auroraVisible = !this.auroraVisible;
+      if (this.auroraVisible) {
+        this.auroraParticles.start();
+        console.log('✨ Northern lights appeared!');
+      } else {
+        this.auroraParticles.stop();
+      }
+    }
+  }
 
   private initializeParticles(): void {
     // Enhanced fire with more particles
@@ -664,6 +828,9 @@ export default class CampfireSimulator {
     const phases = ['New Moon', 'Waxing Crescent', 'First Quarter', 'Waxing Gibbous', 'Full Moon', 'Waning Gibbous', 'Last Quarter', 'Waning Crescent'];
     this.info.moonPhase = phases[Math.floor(this.moonPhase * 8)];
     this.info.fireStrength = Math.round(this.fireIntensity);
+    
+    // Update wildlife and northern lights
+    this.updateWildlife(dt);
   }
   
   private getFireState(): string {

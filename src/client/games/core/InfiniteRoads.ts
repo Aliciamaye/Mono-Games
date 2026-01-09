@@ -24,6 +24,14 @@ import { InfiniteRoadsMenu, GameSettings } from './InfiniteRoadsMenu';
 type Weather = 'clear' | 'rain' | 'fog' | 'sunset' | 'storm';
 type Biome = 'grassland' | 'desert' | 'forest' | 'snow' | 'coastal';
 
+interface TrafficCar {
+  mesh: BABYLON.Mesh;
+  speed: number;
+  lane: number; // -1 (left), 0 (center), 1 (right)
+  position: number; // Distance along road
+  type: 'sedan' | 'truck' | 'suv' | 'bike';
+}
+
 interface CarModel {
   name: string;
   type: 'sedan' | 'suv' | 'sports' | 'truck' | 'bike' | 'van' | 'bus' | 'convertible' | 'rally' | 'electric';
@@ -91,6 +99,11 @@ export default class InfiniteRoads {
   private timeSpeed: number = 0.02;
   private weather: Weather = 'clear';
   private currentBiome: Biome = 'grassland';
+  
+  // Traffic System 🚗
+  private trafficCars: TrafficCar[] = [];
+  private maxTrafficCars: number = 8;
+  private trafficSpawnDistance: number = 150;
   
   
   // Lighting & Post-Processing
@@ -1564,6 +1577,9 @@ export default class InfiniteRoads {
     // Weather transition system
     this.updateWeatherTransition(dt);
     
+    // Update traffic cars
+    this.updateTraffic(dt);
+    
     // Update audio based on speed and game state
     this.updateAudio();
   }
@@ -1582,6 +1598,106 @@ export default class InfiniteRoads {
     while (this.sceneryObjects.length > 100) {
       const obj = this.sceneryObjects.shift();
       if (obj) obj.dispose();
+    }
+    
+    // Remove traffic cars that are too far behind
+    this.trafficCars = this.trafficCars.filter(car => {
+      if (car.position < this.distanceTraveled - 200) {
+        car.mesh.dispose();
+        return false;
+      }
+      return true;
+    });
+  }
+  
+  // Traffic System Methods
+  private spawnTrafficCar(): void {
+    if (this.trafficCars.length >= this.maxTrafficCars) return;
+    
+    const types: ('sedan' | 'truck' | 'suv' | 'bike')[] = ['sedan', 'sedan', 'suv', 'truck', 'bike'];
+    const type = types[Math.floor(Math.random() * types.length)];
+    
+    // Create traffic car mesh
+    let carMesh: BABYLON.Mesh;
+    if (type === 'bike') {
+      carMesh = BABYLON.MeshBuilder.CreateBox('trafficBike', { width: 0.8, height: 1.2, depth: 2 }, this.scene);
+    } else if (type === 'truck') {
+      carMesh = BABYLON.MeshBuilder.CreateBox('trafficTruck', { width: 2.8, height: 3.5, depth: 7 }, this.scene);
+    } else if (type === 'suv') {
+      carMesh = BABYLON.MeshBuilder.CreateBox('trafficSUV', { width: 2.2, height: 2.2, depth: 4.5 }, this.scene);
+    } else {
+      carMesh = BABYLON.MeshBuilder.CreateBox('trafficSedan', { width: 2, height: 1.5, depth: 4 }, this.scene);
+    }
+    
+    // Random color
+    const mat = new BABYLON.StandardMaterial('trafficMat', this.scene);
+    const colors = [
+      new BABYLON.Color3(0.9, 0.1, 0.1), // Red
+      new BABYLON.Color3(0.1, 0.3, 0.9), // Blue
+      new BABYLON.Color3(0.1, 0.1, 0.1), // Black
+      new BABYLON.Color3(0.9, 0.9, 0.9), // White
+      new BABYLON.Color3(0.8, 0.8, 0.1), // Yellow
+      new BABYLON.Color3(0.2, 0.7, 0.3), // Green
+    ];
+    mat.diffuseColor = colors[Math.floor(Math.random() * colors.length)];
+    mat.specularColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+    mat.specularPower = 64;
+    carMesh.material = mat;
+    
+    // Position ahead of player
+    const lane = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+    const spawnPosition = this.distanceTraveled + this.trafficSpawnDistance + Math.random() * 50;
+    
+    carMesh.position.x = lane * 3;
+    carMesh.position.z = spawnPosition;
+    carMesh.position.y = 1.5;
+    
+    // Random speed (slower than player average)
+    const baseSpeed = this.availableCars[this.currentCarIndex].maxSpeed;
+    const speed = baseSpeed * (0.4 + Math.random() * 0.4); // 40-80% of player's max speed
+    
+    this.trafficCars.push({
+      mesh: carMesh,
+      speed,
+      lane,
+      position: spawnPosition,
+      type
+    });
+  }
+  
+  private updateTraffic(dt: number): void {
+    // Spawn new traffic cars
+    if (Math.random() < 0.02 && this.trafficCars.length < this.maxTrafficCars) {
+      this.spawnTrafficCar();
+    }
+    
+    // Update existing traffic
+    for (const car of this.trafficCars) {
+      // Move car forward
+      car.position += car.speed * dt;
+      car.mesh.position.z = car.position;
+      
+      // Simple lane changing logic (occasional)
+      if (Math.random() < 0.001) {
+        const newLane = Math.floor(Math.random() * 3) - 1;
+        if (newLane !== car.lane) {
+          car.lane = newLane;
+          // Smooth lane transition
+          const targetX = newLane * 3;
+          car.mesh.position.x += (targetX - car.mesh.position.x) * 0.05;
+        }
+      }
+      
+      // Match road curve
+      if (this.roadSegments.length > 0) {
+        const nearestSegment = this.roadSegments[Math.floor((car.position / this.segmentLength) % this.roadSegments.length)];
+        if (nearestSegment) {
+          car.mesh.position.x = nearestSegment.curve + car.lane * 3;
+        }
+      }
+      
+      // Slight rotation for realism
+      car.mesh.rotation.y = Math.sin(Date.now() * 0.001 + car.position) * 0.02;
     }
   }
 
