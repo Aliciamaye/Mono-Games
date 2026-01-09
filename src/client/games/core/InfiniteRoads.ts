@@ -1595,33 +1595,48 @@ export default class InfiniteRoads {
       this.hemiLight.intensity = 0.4 + Math.sin(t * Math.PI) * 0.2;
       this.moonLight.intensity = 0; // No moon during day
       
-      // Sunrise/sunset colors
+      // Enhanced sunrise colors (6-8 AM)
       if (hour < 8) {
-        // Sunrise
         const sunriseT = (hour - 6) / 2;
+        // Beautiful orange-pink-blue gradient sunrise
         this.scene.clearColor = new BABYLON.Color4(
-          0.8 + sunriseT * 0.2,
-          0.5 + sunriseT * 0.3,
-          0.3 + sunriseT * 0.6,
+          1.0 - sunriseT * 0.3,      // Red: 1.0 → 0.7
+          0.4 + sunriseT * 0.4,      // Green: 0.4 → 0.8  
+          0.2 + sunriseT * 0.7,      // Blue: 0.2 → 0.9
           1
+        );
+        // Sun rises orange-yellow
+        this.sunLight.diffuse = new BABYLON.Color3(
+          1.0,
+          0.7 + sunriseT * 0.3,
+          0.3 + sunriseT * 0.4
         );
       } else if (hour > 16) {
-        // Sunset
+        // Enhanced sunset colors (4-6 PM)
         const sunsetT = (hour - 16) / 2;
+        // Beautiful purple-orange-red gradient sunset
         this.scene.clearColor = new BABYLON.Color4(
-          0.9 - sunsetT * 0.2,
-          0.6 - sunsetT * 0.3,
-          0.5 - sunsetT * 0.2,
+          0.95 - sunsetT * 0.25,     // Red: 0.95 → 0.7
+          0.55 - sunsetT * 0.35,     // Green: 0.55 → 0.2
+          0.45 - sunsetT * 0.35,     // Blue: 0.45 → 0.1
           1
         );
+        // Sun sets deep orange-red
+        this.sunLight.diffuse = new BABYLON.Color3(
+          1.0,
+          0.5 - sunsetT * 0.3,
+          0.2 - sunsetT * 0.15
+        );
       } else {
-        // Mid-day
+        // Mid-day (bright blue sky)
         this.scene.clearColor = new BABYLON.Color4(
           0.53 - t * 0.1,
           0.81 - t * 0.2,
           0.92 - t * 0.1,
           1
         );
+        // Normal white sunlight
+        this.sunLight.diffuse = new BABYLON.Color3(1.0, 1.0, 0.95);
       }
     } else {
       // Night time
@@ -2010,6 +2025,104 @@ export default class InfiniteRoads {
     } else {
       console.log('📻 Radio turned off');
     }
+  }
+  
+  private updateWeatherTransition(dt: number): void {
+    if (!this.isTransitioning) return;
+    
+    // Progress transition
+    this.weatherTransitionProgress += dt * this.weatherTransitionSpeed;
+    
+    if (this.weatherTransitionProgress >= 1.0) {
+      // Transition complete
+      this.weather = this.targetWeather;
+      this.isTransitioning = false;
+      this.weatherTransitionProgress = 1.0;
+      
+      // Rainbow appears after rain/storm clears
+      if ((this.previousWeather === 'rain' || this.previousWeather === 'storm') && 
+          this.targetWeather === 'clear' && this.currentTime > 12 && this.currentTime < 18) {
+        this.rainbowVisible = true;
+        this.rainbowTimer = 30; // Visible for 30 seconds
+        console.log('🌈 Rainbow appeared!');
+      }
+    }
+    
+    // Smooth interpolation of weather effects
+    const t = this.weatherTransitionProgress;
+    
+    // Interpolate fog density
+    const prevFog = this.getWeatherFogDensity(this.previousWeather);
+    const nextFog = this.getWeatherFogDensity(this.targetWeather);
+    this.scene.fogDensity = prevFog + (nextFog - prevFog) * t;
+    
+    // Interpolate sky color
+    const prevColor = this.getWeatherSkyColor(this.previousWeather);
+    const nextColor = this.getWeatherSkyColor(this.targetWeather);
+    this.scene.clearColor = new BABYLON.Color4(
+      prevColor.r + (nextColor.r - prevColor.r) * t,
+      prevColor.g + (nextColor.g - prevColor.g) * t,
+      prevColor.b + (nextColor.b - prevColor.b) * t,
+      1.0
+    );
+    
+    // Lightning effects during storm
+    if (this.targetWeather === 'storm' && t > 0.3) {
+      this.lightningTimer -= dt;
+      if (this.lightningTimer <= 0) {
+        this.triggerLightning();
+        this.lightningTimer = 3 + Math.random() * 7; // Every 3-10 seconds
+      }
+    }
+    
+    // Rainbow timer
+    if (this.rainbowVisible) {
+      this.rainbowTimer -= dt;
+      if (this.rainbowTimer <= 0) {
+        this.rainbowVisible = false;
+      }
+    }
+  }
+  
+  private getWeatherFogDensity(weather: Weather): number {
+    switch (weather) {
+      case 'fog': return 0.025;
+      case 'storm': return 0.015;
+      case 'rain': return 0.012;
+      default: return 0.008;
+    }
+  }
+  
+  private getWeatherSkyColor(weather: Weather): BABYLON.Color3 {
+    switch (weather) {
+      case 'clear': return new BABYLON.Color3(0.5, 0.7, 1.0);
+      case 'rain': return new BABYLON.Color3(0.4, 0.5, 0.6);
+      case 'fog': return new BABYLON.Color3(0.6, 0.65, 0.7);
+      case 'sunset': return new BABYLON.Color3(1.0, 0.6, 0.4);
+      case 'storm': return new BABYLON.Color3(0.2, 0.2, 0.25);
+      default: return new BABYLON.Color3(0.5, 0.7, 1.0);
+    }
+  }
+  
+  private triggerLightning(): void {
+    // Flash the scene white briefly
+    const originalClearColor = this.scene.clearColor.clone();
+    this.scene.clearColor = new BABYLON.Color4(0.9, 0.95, 1.0, 1.0);
+    
+    // Boost all light intensities temporarily
+    const originalSunIntensity = this.sunLight.intensity;
+    const originalHemiIntensity = this.hemiLight.intensity;
+    this.sunLight.intensity = 3.0;
+    this.hemiLight.intensity = 2.5;
+    
+    // Reset after brief moment
+    setTimeout(() => {
+      this.scene.clearColor = originalClearColor;
+      this.sunLight.intensity = originalSunIntensity;
+      this.hemiLight.intensity = originalHemiIntensity;
+    }, 100);
+    
+    console.log('⚡ Lightning strike!');
   }
   
   // Menu System Methods
