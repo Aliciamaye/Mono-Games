@@ -115,6 +115,23 @@ export default class InfiniteRoads {
   private targetFOV: number = 0.8;
   private cameraShake: number = 0;
   
+  // Audio System 🔊
+  private engineSound!: BABYLON.Sound;
+  private windSound!: BABYLON.Sound;
+  private tireScreechSound!: BABYLON.Sound;
+  private biomeAmbience!: BABYLON.Sound;
+  private radioSound!: BABYLON.Sound;
+  private baseEngineFrequency: number = 1.0;
+  private radioStations: string[] = [
+    'Chill Beats Radio',
+    'Highway Jazz',
+    'Sunset Lounge',
+    'Night Drive FM',
+    'Retro Synthwave'
+  ];
+  private currentRadioStation: number = 0;
+  private radioEnabled: boolean = false;
+  
   // Effects & Scenery
   private clouds: BABYLON.Mesh[] = [];
   private wildlife: BABYLON.Mesh[] = [];
@@ -386,6 +403,7 @@ export default class InfiniteRoads {
     this.generateInitialRoad();
     this.generateClouds();
     this.initializeParticles();
+    this.setupAudio();
   }
 
   private initializeCarModels(): void {
