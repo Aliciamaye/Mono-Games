@@ -1776,6 +1776,15 @@ export default class InfiniteRoads {
     this.updateParticles();
     this.updateInfo();
     
+    // Weather transition system
+    this.updateWeatherTransition(dt);
+    
+    // Update traffic cars
+    this.updateTraffic(dt);
+    
+    // Update audio based on speed and game state
+    this.updateAudio();
+    
     // FPS counter
     this.info.fps = Math.round(this.engine.getFps());
   }
@@ -1906,15 +1915,6 @@ export default class InfiniteRoads {
       const shakeY = (Math.random() - 0.5) * this.cameraShake;
       this.camera.target.addInPlace(new BABYLON.Vector3(shakeX, shakeY, 0));
     }
-    
-    // Weather transition system
-    this.updateWeatherTransition(dt);
-    
-    // Update traffic cars
-    this.updateTraffic(dt);
-    
-    // Update audio based on speed and game state
-    this.updateAudio();
   }
 
   private removeOldSegments(): void {
