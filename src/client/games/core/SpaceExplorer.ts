@@ -76,6 +76,18 @@ export default class SpaceExplorer {
   private wormholes: BABYLON.Mesh[] = [];
   private accretionDisks: BABYLON.ParticleSystem[] = [];
   
+  // Asteroid Mining System
+  private miningBeamActive: boolean = false;
+  private miningBeam!: BABYLON.Mesh;
+  private cargoHold: number = 0;
+  private maxCargo: number = 100;
+  private miningRange: number = 20;
+  
+  // Alien Encounters
+  private alienShips: BABYLON.Mesh[] = [];
+  private spaceWhales: BABYLON.Mesh[] = [];
+  private alienEncounterTimer: number = 0;
+  
   private keys: { [key: string]: boolean } = {};
   private freeCamMode: boolean = false;
   
@@ -84,7 +96,9 @@ export default class SpaceExplorer {
     distanceTraveled: 0,
     currentSector: 'Alpha Centauri',
     nearestObject: 'None',
-    speed: 0
+    speed: 0,
+    cargoHold: 0,
+    credits: 0
   };
 
   constructor(containerId: string) {
@@ -326,6 +340,26 @@ export default class SpaceExplorer {
     shieldMat.alpha = 0; // Start invisible
     shieldMat.wireframe = true;
     this.shieldMesh.material = shieldMat;
+    
+    // Create mining beam (cylinder, initially invisible)
+    this.createMiningBeam();
+  }
+  
+  private createMiningBeam(): void {
+    this.miningBeam = BABYLON.MeshBuilder.CreateCylinder('miningBeam', {
+      diameter: 0.5,
+      height: 20,
+      tessellation: 8
+    }, this.scene);
+    this.miningBeam.parent = this.ship;
+    this.miningBeam.position.z = 10;
+    this.miningBeam.rotation.x = Math.PI / 2;
+    
+    const beamMat = new BABYLON.StandardMaterial('beamMat', this.scene);
+    beamMat.emissiveColor = new BABYLON.Color3(0.0, 1.0, 0.5);
+    beamMat.diffuseColor = new BABYLON.Color3(0.0, 0.8, 0.4);
+    beamMat.alpha = 0; // Start invisible
+    this.miningBeam.material = beamMat;
   }
 
   private generateUniverse(): void {
@@ -357,6 +391,24 @@ export default class SpaceExplorer {
       const z = (Math.random() - 0.5) * 700;
       this.createWormhole(new BABYLON.Vector3(x, y, z));
     }
+    
+    // Add alien ships (rare encounters)
+    for (let i = 0; i < 2; i++) {
+      const x = (Math.random() - 0.5) * 800;
+      const y = (Math.random() - 0.5) * 800;
+      const z = (Math.random() - 0.5) * 800;
+      this.createAlienShip(new BABYLON.Vector3(x, y, z));
+    }
+    
+    // Add space whale (very rare)
+    if (Math.random() > 0.5) {
+      const x = (Math.random() - 0.5) * 900;
+      const y = (Math.random() - 0.5) * 900;
+      const z = (Math.random() - 0.5) * 900;
+      this.createSpaceWhale(new BABYLON.Vector3(x, y, z));
+    }
+    
+    this.alienEncounterTimer = 60 + Math.random() * 60; // Random encounter every 1-2 minutes
     
     this.createStarfield();
   }
@@ -900,6 +952,109 @@ export default class SpaceExplorer {
     portalLight.range = 80;
     portalLight.diffuse = new BABYLON.Color3(0.0, 0.8, 1.0);
   }
+  
+  private createAlienShip(pos: BABYLON.Vector3): void {
+    // Sleek alien spacecraft
+    const hull = BABYLON.MeshBuilder.CreateSphere('alienHull', {
+      diameter: 6,
+      segments: 16
+    }, this.scene);
+    hull.position = pos;
+    hull.scaling.y = 0.4; // Flatten for disc shape
+    
+    const dome = BABYLON.MeshBuilder.CreateSphere('alienDome', {
+      diameter: 3,
+      segments: 12
+    }, this.scene);
+    dome.position = pos.add(new BABYLON.Vector3(0, 1.5, 0));
+    dome.scaling.y = 0.6;
+    
+    const alienShip = BABYLON.Mesh.MergeMeshes([hull, dome], true)!;
+    
+    const alienMat = new BABYLON.StandardMaterial('alienMat', this.scene);
+    alienMat.diffuseColor = new BABYLON.Color3(0.6, 0.2, 0.8);
+    alienMat.emissiveColor = new BABYLON.Color3(0.3, 0.1, 0.4);
+    alienMat.specularColor = new BABYLON.Color3(1.0, 0.5, 1.0);
+    alienMat.specularPower = 256;
+    alienShip.material = alienMat;
+    
+    // Add navigation lights
+    const lights = [];
+    for (let i = 0; i < 3; i++) {
+      const angle = (i / 3) * Math.PI * 2;
+      const light = new BABYLON.PointLight(`alienLight_${i}`, 
+        pos.add(new BABYLON.Vector3(Math.cos(angle) * 3, 0, Math.sin(angle) * 3)), 
+        this.scene
+      );
+      light.intensity = 3;
+      light.range = 15;
+      light.diffuse = new BABYLON.Color3(0.8, 0.2, 1.0);
+      lights.push(light);
+    }
+    
+    // Add movement metadata
+    alienShip.metadata = {
+      velocity: new BABYLON.Vector3((Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5),
+      rotSpeed: (Math.random() - 0.5) * 0.02,
+      lights: lights
+    };
+    
+    this.alienShips.push(alienShip);
+    console.log('👽 Alien ship detected!');
+  }
+  
+  private createSpaceWhale(pos: BABYLON.Vector3): void {
+    // Massive space creature
+    const body = BABYLON.MeshBuilder.CreateSphere('whaleBody', {
+      diameter: 30,
+      segments: 16
+    }, this.scene);
+    body.position = pos;
+    body.scaling.set(2, 1, 3); // Elongated shape
+    
+    // Tail fin
+    const tail = BABYLON.MeshBuilder.CreateBox('whaleTail', {
+      width: 15,
+      height: 0.5,
+      depth: 8
+    }, this.scene);
+    tail.position = pos.add(new BABYLON.Vector3(0, 0, -25));
+    
+    // Side fins
+    const finL = BABYLON.MeshBuilder.CreateBox('finL', {
+      width: 12,
+      height: 0.5,
+      depth: 6
+    }, this.scene);
+    finL.position = pos.add(new BABYLON.Vector3(-18, 0, 0));
+    finL.rotation.z = -Math.PI / 6;
+    
+    const finR = BABYLON.MeshBuilder.CreateBox('finR', {
+      width: 12,
+      height: 0.5,
+      depth: 6
+    }, this.scene);
+    finR.position = pos.add(new BABYLON.Vector3(18, 0, 0));
+    finR.rotation.z = Math.PI / 6;
+    
+    const whale = BABYLON.Mesh.MergeMeshes([body, tail, finL, finR], true)!;
+    
+    const whaleMat = new BABYLON.StandardMaterial('whaleMat', this.scene);
+    whaleMat.diffuseColor = new BABYLON.Color3(0.3, 0.4, 0.6);
+    whaleMat.emissiveColor = new BABYLON.Color3(0.1, 0.2, 0.3);
+    whaleMat.specularColor = new BABYLON.Color3(0.5, 0.6, 0.8);
+    whale.material = whaleMat;
+    
+    // Add gentle movement
+    whale.metadata = {
+      velocity: new BABYLON.Vector3((Math.random() - 0.5) * 0.2, (Math.random() - 0.5) * 0.2, (Math.random() - 0.5) * 0.2),
+      rotSpeed: 0.001,
+      swimPhase: Math.random() * Math.PI * 2
+    };
+    
+    this.spaceWhales.push(whale);
+    console.log('🐋 Space whale sighted!');
+  }
 
   private createStarfield(): void {
     for (let i = 0; i < 1000; i++) {
@@ -983,6 +1138,12 @@ export default class SpaceExplorer {
         delete this.keys['shift'];
       }
       
+      // Mining beam (M key)
+      if (this.keys['m']) {
+        this.toggleMiningBeam();
+        delete this.keys['m'];
+      }
+      
       const forward = this.ship.forward;
       this.ship.position.addInPlace(forward.scale(this.shipSpeed * dt));
       this.camera.position = this.ship.position.add(new BABYLON.Vector3(0, 2, -8));
@@ -1006,6 +1167,22 @@ export default class SpaceExplorer {
       if (obj.type === 'asteroid' && obj.mesh.metadata?.rotSpeed) {
         obj.mesh.rotation.y += obj.mesh.metadata.rotSpeed;
         obj.mesh.rotation.x += obj.mesh.metadata.rotSpeed * 0.7;
+        
+        // Mining beam asteroid interaction
+        if (this.miningBeamActive) {
+          const dist = BABYLON.Vector3.Distance(this.ship.position, obj.position);
+          if (dist < this.miningRange && this.cargoHold < this.maxCargo) {
+            // Extract resources
+            const mineAmount = 10 * dt;
+            this.cargoHold = Math.min(this.cargoHold + mineAmount, this.maxCargo);
+            this.info.cargoHold = Math.floor(this.cargoHold);
+            
+            // Shrink asteroid slightly
+            if (obj.mesh.scaling.x > 0.3) {
+              obj.mesh.scaling.scaleInPlace(1 - dt * 0.1);
+            }
+          }
+        }
       }
       
       // Move comets with their velocity
@@ -1018,6 +1195,16 @@ export default class SpaceExplorer {
       if (dist < 50 && !obj.discovered && obj.type === 'planet') {
         obj.discovered = true;
         this.info.planetsDiscovered++;
+      }
+    }
+    
+    // Update mining beam visual
+    if (this.miningBeam && this.miningBeam.material) {
+      const beamMat = this.miningBeam.material as BABYLON.StandardMaterial;
+      if (this.miningBeamActive) {
+        beamMat.alpha = Math.min(beamMat.alpha + dt * 3, 0.7);
+      } else {
+        beamMat.alpha = Math.max(beamMat.alpha - dt * 3, 0);
       }
     }
     
@@ -1079,6 +1266,38 @@ export default class SpaceExplorer {
       }
     }
     
+    // Animate alien ships
+    for (const alienShip of this.alienShips) {
+      if (alienShip.metadata?.velocity) {
+        alienShip.position.addInPlace(alienShip.metadata.velocity.scale(dt));
+        alienShip.rotation.y += alienShip.metadata.rotSpeed;
+        
+        // Check for peaceful encounter
+        const dist = BABYLON.Vector3.Distance(this.ship.position, alienShip.position);
+        if (dist < 30 && !alienShip.metadata.encountered) {
+          alienShip.metadata.encountered = true;
+          console.log('👽 First contact! The aliens send a peaceful signal.');
+        }
+      }
+    }
+    
+    // Animate space whales
+    for (const whale of this.spaceWhales) {
+      if (whale.metadata?.velocity) {
+        whale.metadata.swimPhase += dt;
+        whale.position.addInPlace(whale.metadata.velocity.scale(dt));
+        // Gentle swimming motion
+        whale.rotation.x = Math.sin(whale.metadata.swimPhase * 0.5) * 0.1;
+        whale.rotation.z = Math.cos(whale.metadata.swimPhase * 0.3) * 0.05;
+        
+        const dist = BABYLON.Vector3.Distance(this.ship.position, whale.position);
+        if (dist < 50 && !whale.metadata.encountered) {
+          whale.metadata.encountered = true;
+          console.log('🐋 Majestic space whale glides past your ship!');
+        }
+      }
+    }
+    
     this.info.speed = Math.round(this.shipSpeed);
   }
   
@@ -1126,6 +1345,28 @@ export default class SpaceExplorer {
       shipMat.emissiveColor = color.scale(0.2);
     }
     console.log(`🎨 Ship color changed to RGB(${color.r.toFixed(2)}, ${color.g.toFixed(2)}, ${color.b.toFixed(2)})`);
+  }
+  
+  private toggleMiningBeam(): void {
+    this.miningBeamActive = !this.miningBeamActive;
+    if (this.miningBeamActive) {
+      console.log('⛏️ Mining beam ACTIVE');
+    } else {
+      console.log('⛏️ Mining beam deactivated');
+    }
+  }
+  
+  public sellCargo(): void {
+    if (this.cargoHold <= 0) {
+      console.log('⚠️ No cargo to sell!');
+      return;
+    }
+    
+    const credits = Math.floor(this.cargoHold * 10); // 10 credits per unit
+    this.info.credits += credits;
+    console.log(`💰 Sold ${this.cargoHold.toFixed(0)} units for ${credits} credits!`);
+    this.cargoHold = 0;
+    this.info.cargoHold = 0;
   }
 
   // Menu System Methods
