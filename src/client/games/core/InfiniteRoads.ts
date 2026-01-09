@@ -238,6 +238,7 @@ export default class InfiniteRoads {
       if (e.key === 'n') this.cycleWeather(); // Changed from 'w' to avoid conflict with forward
       if (e.key === 'b') this.cycleBiome();
       if (e.key === 'v') this.cycleCarModel();
+      if (e.key === 'r') this.toggleRadio(); // Radio on/off
       if (e.key === 'h') this.toggleHelp();
     });
 
@@ -1329,6 +1330,14 @@ export default class InfiniteRoads {
   // Required by GamePlay.tsx - cleanup
   destroy(): void {
     this.isRunning = false;
+    
+    // Stop all audio
+    if (this.engineSound) this.engineSound.stop();
+    if (this.windSound) this.windSound.stop();
+    if (this.tireScreechSound) this.tireScreechSound.stop();
+    if (this.biomeAmbience) this.biomeAmbience.stop();
+    if (this.radioSound) this.radioSound.stop();
+    
     this.engine.stopRenderLoop();
     this.scene.dispose();
     this.engine.dispose();
@@ -1541,6 +1550,9 @@ export default class InfiniteRoads {
       const shakeY = (Math.random() - 0.5) * this.cameraShake;
       this.camera.target.addInPlace(new BABYLON.Vector3(shakeX, shakeY, 0));
     }
+    
+    // Update audio based on speed and game state
+    this.updateAudio();
   }
 
   private removeOldSegments(): void {
@@ -1695,13 +1707,14 @@ export default class InfiniteRoads {
 
   private toggleHelp(): void {
     // TODO: Show help overlay with controls
-    console.log('CONTROLS:');
-    console.log('WASD/Arrows: Drive');
-    console.log('V: Change car');
-    console.log('C: Change camera');
-    console.log('T: Change time');
-    console.log('W: Change weather');
+    console.log('🎮 CONTROLS:');
+    console.log('WASD/Arrows: Drive and steer');
+    console.log('V: Change car model');
+    console.log('C: Change camera view');
+    console.log('T: Change time of day');
+    console.log('N: Change weather');
     console.log('B: Change biome');
+    console.log('R: Toggle radio (music)');
     console.log('H: Toggle help');
   }
 
@@ -1833,6 +1846,155 @@ export default class InfiniteRoads {
     this.tireSmokeRight = { system: tireSmokeRight, active: false };
   }
   
+  private setupAudio(): void {
+    // Engine sound - low rumble that changes with RPM
+    this.engineSound = new BABYLON.Sound(
+      'engine',
+      'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=',
+      this.scene,
+      null,
+      {
+        loop: true,
+        autoplay: false,
+        volume: 0.4,
+        playbackRate: 1.0
+      }
+    );
+    
+    // Wind sound - whoosh that scales with speed
+    this.windSound = new BABYLON.Sound(
+      'wind',
+      'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=',
+      this.scene,
+      null,
+      {
+        loop: true,
+        autoplay: false,
+        volume: 0.2,
+        playbackRate: 1.0
+      }
+    );
+    
+    // Tire screech sound - high pitch for drifting
+    this.tireScreechSound = new BABYLON.Sound(
+      'tireScreech',
+      'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=',
+      this.scene,
+      null,
+      {
+        loop: false,
+        autoplay: false,
+        volume: 0.5
+      }
+    );
+    
+    // Biome ambience - changes with biome (birds, wind, waves, etc.)
+    this.biomeAmbience = new BABYLON.Sound(
+      'ambience',
+      'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=',
+      this.scene,
+      null,
+      {
+        loop: true,
+        autoplay: false,
+        volume: 0.3,
+        playbackRate: 1.0
+      }
+    );
+    
+    // Radio sound - optional music
+    this.radioSound = new BABYLON.Sound(
+      'radio',
+      'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=',
+      this.scene,
+      null,
+      {
+        loop: true,
+        autoplay: false,
+        volume: 0.4
+      }
+    );
+  }
+  
+  private updateAudio(): void {
+    if (!this.gameStarted) return;
+    
+    const speedPercent = this.carSpeed / this.availableCars[this.currentCarIndex].maxSpeed;
+    
+    // Engine sound - pitch increases with RPM (speed)
+    if (this.engineSound && this.gameSettings.sfxVolume > 0) {
+      if (!this.engineSound.isPlaying) {
+        this.engineSound.play();
+      }
+      // RPM-based pitch: idle (0.6) to redline (2.0)
+      const enginePitch = 0.6 + (speedPercent * 1.4);
+      this.engineSound.setPlaybackRate(enginePitch);
+      this.engineSound.setVolume(0.3 * this.gameSettings.sfxVolume + (speedPercent * 0.3));
+    }
+    
+    // Wind sound - volume scales with speed
+    if (this.windSound && this.gameSettings.sfxVolume > 0) {
+      if (speedPercent > 0.2) {
+        if (!this.windSound.isPlaying) {
+          this.windSound.play();
+        }
+        // Wind increases dramatically at high speed
+        const windVolume = Math.pow(speedPercent, 2) * 0.5 * this.gameSettings.sfxVolume;
+        this.windSound.setVolume(windVolume);
+        this.windSound.setPlaybackRate(0.8 + (speedPercent * 0.4));
+      } else {
+        this.windSound.stop();
+      }
+    }
+    
+    // Tire screech on drift
+    if (this.tireScreechSound && this.gameSettings.sfxVolume > 0) {
+      const isDrifting = Math.abs(this.carPosition) > 0.3 && speedPercent > 0.5;
+      if (isDrifting && !this.tireScreechSound.isPlaying) {
+        this.tireScreechSound.play();
+      } else if (!isDrifting && this.tireScreechSound.isPlaying) {
+        this.tireScreechSound.stop();
+      }
+    }
+    
+    // Biome ambience - always playing at low volume
+    if (this.biomeAmbience && this.gameSettings.volume > 0) {
+      if (!this.biomeAmbience.isPlaying) {
+        this.biomeAmbience.play();
+      }
+      // Different ambience for each biome (simulated with pitch)
+      const biomePitches = {
+        grassland: 1.0,  // Birds chirping
+        forest: 0.85,    // Dense forest sounds
+        desert: 1.2,     // Desert wind
+        snow: 0.9,       // Cold wind
+        coastal: 1.1     // Ocean waves
+      };
+      this.biomeAmbience.setPlaybackRate(biomePitches[this.currentBiome]);
+      this.biomeAmbience.setVolume(0.25 * this.gameSettings.volume);
+    }
+    
+    // Radio - optional background music
+    if (this.radioSound && this.radioEnabled && this.gameSettings.musicVolume > 0) {
+      if (!this.radioSound.isPlaying) {
+        this.radioSound.play();
+      }
+      this.radioSound.setVolume(0.4 * this.gameSettings.musicVolume);
+    } else if (this.radioSound && this.radioSound.isPlaying) {
+      this.radioSound.stop();
+    }
+  }
+  
+  private toggleRadio(): void {
+    this.radioEnabled = !this.radioEnabled;
+    if (this.radioEnabled) {
+      this.currentRadioStation = (this.currentRadioStation + 1) % this.radioStations.length;
+      console.log(`📻 Now playing: ${this.radioStations[this.currentRadioStation]}`);
+    } else {
+      console.log('📻 Radio turned off');
+    }
+  }
+  
   // Menu System Methods
   private startGame(carIndex: number, settings: GameSettings): void {
     this.currentCarIndex = carIndex;
@@ -1864,11 +2026,21 @@ export default class InfiniteRoads {
   private pauseGame(): void {
     this.isPaused = true;
     this.menu.showPauseMenu();
+    
+    // Pause audio
+    if (this.engineSound && this.engineSound.isPlaying) this.engineSound.pause();
+    if (this.windSound && this.windSound.isPlaying) this.windSound.pause();
+    if (this.tireScreechSound && this.tireScreechSound.isPlaying) this.tireScreechSound.pause();
+    // Keep ambience and radio playing during pause for atmosphere
   }
   
   private resumeGame(): void {
     this.isPaused = false;
     this.menu.hidePauseMenu();
+    
+    // Resume audio
+    if (this.engineSound && !this.engineSound.isPlaying) this.engineSound.play();
+    if (this.windSound && !this.windSound.isPlaying && this.carSpeed > 0) this.windSound.play();
   }
   
   private applySettings(settings: GameSettings): void {

@@ -266,8 +266,12 @@ export class InfiniteRoadsMenu {
               <div class="control-desc">Change Car</div>
             </div>
             <div class="control-item">
+              <div class="control-key">R</div>
+              <div class="control-desc">Toggle Radio (Music)</div>
+            </div>
+            <div class="control-item">
               <div class="control-key">H</div>
-              <div class="control-desc">Toggle Headlights</div>
+              <div class="control-desc">Toggle Help</div>
             </div>
             <div class="control-item">
               <div class="control-key">N</div>
