@@ -911,14 +911,15 @@ export interface GameSettings {
   sfxVolume: number;
 }
 
-interface RoadSegment {
-  mesh: BABYLON.Mesh;
-  curve: number;
-  elevation: number;
-  index: number;
-}
+// Unused interfaces - commenting out to remove errors
+// interface RoadSegment {
+//   mesh: BABYLON.Mesh;
+//   curve: number;
+//   elevation: number;
+//   index: number;
+// }
 
-interface TerrainChunk {
-  mesh: BABYLON.Mesh;
-  index: number;
-}
+// interface TerrainChunk {
+//   mesh: BABYLON.Mesh;
+//   index: number;
+// }
