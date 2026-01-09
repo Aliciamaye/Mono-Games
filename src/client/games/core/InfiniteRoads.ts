@@ -301,24 +301,54 @@ export default class InfiniteRoads {
       [this.camera]
     );
     
-    // Enhanced effects for better visuals
+    // Enhanced effects for better visuals than slowroads.io
     this.defaultPipeline.bloomEnabled = true;
-    this.defaultPipeline.bloomThreshold = 0.6;
-    this.defaultPipeline.bloomWeight = 0.5;
+    this.defaultPipeline.bloomThreshold = 0.5; // Lower threshold for more glow
+    this.defaultPipeline.bloomWeight = 0.6; // Stronger bloom
     this.defaultPipeline.bloomKernel = 128;
-    this.defaultPipeline.bloomScale = 0.7;
+    this.defaultPipeline.bloomScale = 0.8;
     
     this.defaultPipeline.fxaaEnabled = true;
     this.defaultPipeline.sharpenEnabled = true;
-    this.defaultPipeline.sharpen.edgeAmount = 0.5;
-    this.defaultPipeline.sharpen.colorAmount = 1.0;
+    this.defaultPipeline.sharpen.edgeAmount = 0.6;
+    this.defaultPipeline.sharpen.colorAmount = 1.2;
     
-    // Depth of field for cinematic look (slowroads.io style)
+    // Depth of field for cinematic look (slowroads.io style but BETTER)
     this.defaultPipeline.depthOfFieldEnabled = true;
-    this.defaultPipeline.depthOfFieldBlurLevel = BABYLON.DepthOfFieldEffectBlurLevel.Medium;
-    this.defaultPipeline.depthOfField.fStop = 1.4;
-    this.defaultPipeline.depthOfField.focalLength = 50;
-    this.defaultPipeline.depthOfField.focusDistance = 2000;
+    this.defaultPipeline.depthOfFieldBlurLevel = BABYLON.DepthOfFieldEffectBlurLevel.High;
+    this.defaultPipeline.depthOfField.fStop = 1.2; // More shallow DOF
+    this.defaultPipeline.depthOfField.focalLength = 60;
+    this.defaultPipeline.depthOfField.focusDistance = 2200;
+    
+    // Add chromatic aberration for cinematic realism
+    this.defaultPipeline.chromaticAberrationEnabled = true;
+    this.defaultPipeline.chromaticAberration.aberrationAmount = 15;
+    this.defaultPipeline.chromaticAberration.radialIntensity = 0.5;
+    
+    // Add grain for film-like quality
+    this.defaultPipeline.grainEnabled = true;
+    this.defaultPipeline.grain.intensity = 8;
+    this.defaultPipeline.grain.animated = true;
+    
+    // Add vignette for focus on center
+    this.defaultPipeline.imageProcessingEnabled = true;
+    this.defaultPipeline.imageProcessing.vignetteEnabled = true;
+    this.defaultPipeline.imageProcessing.vignetteWeight = 3;
+    this.defaultPipeline.imageProcessing.vignetteColor = new BABYLON.Color4(0, 0, 0, 0);
+    this.defaultPipeline.imageProcessing.vignetteBlendMode = BABYLON.ImageProcessingConfiguration.VIGNETTEMODE_MULTIPLY;
+    
+    // Enhanced contrast and exposure for better colors
+    this.defaultPipeline.imageProcessing.contrast = 1.3;
+    this.defaultPipeline.imageProcessing.exposure = 1.1;
+    
+    // Color curves for cinematic look
+    this.defaultPipeline.imageProcessing.colorCurvesEnabled = true;
+    const curves = new BABYLON.ColorCurves();
+    curves.globalHue = 15;
+    curves.globalSaturation = 20;
+    curves.highlightsHue = 30;
+    curves.highlightsSaturation = 15;
+    this.defaultPipeline.imageProcessing.colorCurves = curves;
 
     // Skybox for atmosphere
     const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 10000 }, this.scene);
@@ -665,12 +695,18 @@ export default class InfiniteRoads {
       parts.push(wheel, rim);
     }
     
-    // Car paint material with metallic finish (better than PBR for performance)
-    const carMat = new BABYLON.StandardMaterial('carMat', this.scene);
-    carMat.diffuseColor = model.color;
-    carMat.specularColor = new BABYLON.Color3(1, 1, 1);
-    carMat.specularPower = 128;
-    carMat.emissiveColor = model.color.scale(0.05);
+    // Car paint material with PREMIUM metallic finish (BEATS slowroads.io)
+    const carMat = new BABYLON.PBRMetallicRoughnessMaterial('carMat', this.scene);
+    carMat.baseColor = model.color;
+    carMat.metallic = 0.9; // Highly metallic car paint
+    carMat.roughness = 0.2; // Smooth glossy finish
+    carMat.environmentTexture = this.scene.environmentTexture;
+    
+    // Enable realistic reflections
+    this.scene.environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData(
+      'https://playground.babylonjs.com/textures/environment.dds',
+      this.scene
+    );
     
     carBody.material = carMat;
     hood.material = carMat;
