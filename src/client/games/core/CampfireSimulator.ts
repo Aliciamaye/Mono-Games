@@ -59,6 +59,12 @@ export default class CampfireSimulator {
   private auroraVisible: boolean = false;
   private wildlifeTimer: number = 0;
   
+  // Camping Equipment
+  private campingGear: BABYLON.Mesh[] = [];
+  private tentMesh!: BABYLON.Mesh;
+  private chairMeshes: BABYLON.Mesh[] = [];
+  private coolerMesh!: BABYLON.Mesh;
+  
   private keys: { [key: string]: boolean } = {};
   
   public info = {
@@ -141,6 +147,7 @@ export default class CampfireSimulator {
     this.createStarfield();
     this.createMoon();
     this.createNorthernLights();
+    this.createCampingGear();
     this.initializeParticles();
     
     // Initial wildlife spawn timer
@@ -514,6 +521,140 @@ export default class CampfireSimulator {
       this.auroraVisible = true;
       this.auroraParticles.start();
     }
+  }
+  
+  private createCampingGear(): void {
+    // Tent (dome tent behind campfire)
+    const tentBase = BABYLON.MeshBuilder.CreateCylinder('tentBase', {
+      diameter: 5,
+      height: 3,
+      tessellation: 16,
+      arc: 0.5
+    }, this.scene);
+    tentBase.position.set(0, 1.5, -12);
+    tentBase.rotation.x = Math.PI / 2;
+    
+    const tentMat = new BABYLON.StandardMaterial('tentMat', this.scene);
+    tentMat.diffuseColor = new BABYLON.Color3(0.2, 0.5, 0.3);
+    tentMat.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+    tentBase.material = tentMat;
+    
+    // Tent door flap
+    const doorFlap = BABYLON.MeshBuilder.CreateBox('doorFlap', {
+      width: 1.5,
+      height: 2,
+      depth: 0.1
+    }, this.scene);
+    doorFlap.position.set(0, 1, -9.5);
+    doorFlap.material = tentMat;
+    
+    this.tentMesh = BABYLON.Mesh.MergeMeshes([tentBase, doorFlap], true)!;
+    this.campingGear.push(this.tentMesh);
+    
+    // Camping chairs (4 chairs around fire)
+    const chairPositions = [
+      { x: 3, z: 0, rot: -Math.PI / 2 },
+      { x: -3, z: 0, rot: Math.PI / 2 },
+      { x: 0, z: 3, rot: 0 },
+      { x: 0, z: -3, rot: Math.PI }
+    ];
+    
+    for (const pos of chairPositions) {
+      const chair = this.createChair();
+      chair.position.set(pos.x, 0, pos.z);
+      chair.rotation.y = pos.rot;
+      this.chairMeshes.push(chair);
+      this.campingGear.push(chair);
+    }
+    
+    // Cooler (next to one of the chairs)
+    const coolerBody = BABYLON.MeshBuilder.CreateBox('coolerBody', {
+      width: 1.5,
+      height: 0.8,
+      depth: 1
+    }, this.scene);
+    coolerBody.position.set(4, 0.4, 1);
+    
+    const coolerLid = BABYLON.MeshBuilder.CreateBox('coolerLid', {
+      width: 1.5,
+      height: 0.1,
+      depth: 1
+    }, this.scene);
+    coolerLid.position.set(4, 0.85, 1);
+    
+    const coolerMat = new BABYLON.StandardMaterial('coolerMat', this.scene);
+    coolerMat.diffuseColor = new BABYLON.Color3(0.2, 0.4, 0.7);
+    coolerMat.specularColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+    coolerMat.specularPower = 64;
+    coolerBody.material = coolerMat;
+    coolerLid.material = coolerMat;
+    
+    this.coolerMesh = BABYLON.Mesh.MergeMeshes([coolerBody, coolerLid], true)!;
+    this.campingGear.push(this.coolerMesh);
+    
+    // Camping lantern (hanging on tent)
+    const lantern = BABYLON.MeshBuilder.CreateCylinder('lantern', {
+      diameter: 0.3,
+      height: 0.5,
+      tessellation: 8
+    }, this.scene);
+    lantern.position.set(-1.5, 2.5, -10);
+    
+    const lanternMat = new BABYLON.StandardMaterial('lanternMat', this.scene);
+    lanternMat.emissiveColor = new BABYLON.Color3(1.0, 0.8, 0.3);
+    lanternMat.diffuseColor = new BABYLON.Color3(0.9, 0.7, 0.2);
+    lantern.material = lanternMat;
+    
+    // Add point light for lantern
+    const lanternLight = new BABYLON.PointLight('lanternLight', lantern.position, this.scene);
+    lanternLight.intensity = 2;
+    lanternLight.range = 8;
+    lanternLight.diffuse = new BABYLON.Color3(1.0, 0.8, 0.4);
+    
+    this.campingGear.push(lantern);
+    
+    console.log('⛺ Camping gear setup complete!');
+  }
+  
+  private createChair(): BABYLON.Mesh {
+    // Simple camping chair
+    const seat = BABYLON.MeshBuilder.CreateBox('seat', {
+      width: 0.8,
+      height: 0.1,
+      depth: 0.8
+    }, this.scene);
+    seat.position.y = 0.5;
+    
+    const backrest = BABYLON.MeshBuilder.CreateBox('backrest', {
+      width: 0.8,
+      height: 1,
+      depth: 0.1
+    }, this.scene);
+    backrest.position.y = 0.9;
+    backrest.position.z = -0.35;
+    backrest.rotation.x = -Math.PI / 12;
+    
+    // Chair legs
+    const legs: BABYLON.Mesh[] = [];
+    for (let i = 0; i < 4; i++) {
+      const leg = BABYLON.MeshBuilder.CreateCylinder('leg', {
+        diameter: 0.08,
+        height: 0.5
+      }, this.scene);
+      const x = (i % 2 === 0) ? -0.35 : 0.35;
+      const z = (i < 2) ? -0.35 : 0.35;
+      leg.position.set(x, 0.25, z);
+      legs.push(leg);
+    }
+    
+    const chairMat = new BABYLON.StandardMaterial('chairMat', this.scene);
+    chairMat.diffuseColor = new BABYLON.Color3(0.3, 0.3, 0.35);
+    chairMat.specularColor = new BABYLON.Color3(0.4, 0.4, 0.4);
+    
+    const chair = BABYLON.Mesh.MergeMeshes([seat, backrest, ...legs], true)!;
+    chair.material = chairMat;
+    
+    return chair;
   }
   
   private spawnWildlife(): void {

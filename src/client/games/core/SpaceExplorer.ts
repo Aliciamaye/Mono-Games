@@ -57,6 +57,16 @@ export default class SpaceExplorer {
   private shipVelocity: BABYLON.Vector3 = BABYLON.Vector3.Zero();
   private maxSpeed: number = 50;
   
+  // Ship Upgrades & Customization
+  private shipColor: BABYLON.Color3 = new BABYLON.Color3(0.2, 0.5, 1.0); // Default blue
+  private speedUpgradeLevel: number = 0; // 0-5 levels
+  private shieldActive: boolean = false;
+  private shieldMesh!: BABYLON.Mesh;
+  private shieldStrength: number = 100;
+  private boostAvailable: boolean = true;
+  private boostCooldown: number = 0;
+  private boostDuration: number = 0;
+  
   private spaceObjects: SpaceObject[] = [];
   private nebulae: BABYLON.Mesh[] = [];
   private stars: BABYLON.PointLight[] = [];
@@ -235,10 +245,10 @@ export default class SpaceExplorer {
     
     // Ship body material (metallic)
     const mat = new BABYLON.StandardMaterial('shipMat', this.scene);
-    mat.diffuseColor = new BABYLON.Color3(0.85, 0.85, 0.92);
+    mat.diffuseColor = this.shipColor; // Use customizable color
     mat.specularColor = new BABYLON.Color3(1, 1, 1);
     mat.specularPower = 128;
-    mat.emissiveColor = new BABYLON.Color3(0.1, 0.15, 0.25);
+    mat.emissiveColor = this.shipColor.scale(0.2);
     
     body.material = mat;
     wingL.material = mat;
@@ -296,6 +306,26 @@ export default class SpaceExplorer {
     // Right engine trail
     const particleSystemR = particleSystemL.clone('engineParticlesR', new BABYLON.Vector3(2.5, 0, -1.85));
     particleSystemR.start();
+    
+    // Create shield mesh (invisible until activated)
+    this.createShieldMesh();
+  }
+  
+  private createShieldMesh(): void {
+    this.shieldMesh = BABYLON.MeshBuilder.CreateSphere('shield', {
+      diameter: 8,
+      segments: 16
+    }, this.scene);
+    this.shieldMesh.parent = this.ship;
+    this.shieldMesh.position = BABYLON.Vector3.Zero();
+    
+    const shieldMat = new BABYLON.StandardMaterial('shieldMat', this.scene);
+    shieldMat.diffuseColor = new BABYLON.Color3(0.2, 0.6, 1.0);
+    shieldMat.specularColor = new BABYLON.Color3(0.5, 0.8, 1.0);
+    shieldMat.emissiveColor = new BABYLON.Color3(0.1, 0.3, 0.6);
+    shieldMat.alpha = 0; // Start invisible
+    shieldMat.wireframe = true;
+    this.shieldMesh.material = shieldMat;
   }
 
   private generateUniverse(): void {
@@ -904,14 +934,54 @@ export default class SpaceExplorer {
   update(deltaTime: number): void {
     const dt = deltaTime / 1000;
     
+    // Update boost cooldown
+    if (this.boostCooldown > 0) {
+      this.boostCooldown -= dt;
+      if (this.boostCooldown <= 0) {
+        this.boostAvailable = true;
+        console.log('🚀 Boost ready!');
+      }
+    }
+    
+    // Update boost duration
+    if (this.boostDuration > 0) {
+      this.boostDuration -= dt;
+      if (this.boostDuration <= 0) {
+        this.maxSpeed = 50 + (this.speedUpgradeLevel * 10); // Return to normal max
+      }
+    }
+    
+    // Shield regeneration
+    if (this.shieldStrength < 100) {
+      this.shieldStrength = Math.min(100, this.shieldStrength + 5 * dt);
+    }
+    
     if (!this.freeCamMode) {
-      if (this.keys['w'] || this.keys['arrowup']) this.shipSpeed = Math.min(this.shipSpeed + 20 * dt, this.maxSpeed);
-      else this.shipSpeed = Math.max(this.shipSpeed - 10 * dt, 0);
+      // Apply speed upgrade
+      const upgradedMaxSpeed = 50 + (this.speedUpgradeLevel * 10);
+      
+      if (this.keys['w'] || this.keys['arrowup']) {
+        this.shipSpeed = Math.min(this.shipSpeed + 20 * dt, this.maxSpeed);
+      } else {
+        this.shipSpeed = Math.max(this.shipSpeed - 10 * dt, 0);
+      }
       
       if (this.keys['a'] || this.keys['arrowleft']) this.ship.rotation.y += 1 * dt;
       if (this.keys['d'] || this.keys['arrowright']) this.ship.rotation.y -= 1 * dt;
       if (this.keys['q']) this.ship.rotation.z += 1 * dt;
       if (this.keys['e']) this.ship.rotation.z -= 1 * dt;
+      
+      // Shield toggle (S key)
+      if (this.keys['s']) {
+        this.toggleShield();
+        delete this.keys['s']; // Prevent repeated activation
+      }
+      
+      // Boost activation (Shift key)
+      if (this.keys['shift'] && this.boostAvailable) {
+        this.activateBoost();
+        delete this.keys['shift'];
+      }
       
       const forward = this.ship.forward;
       this.ship.position.addInPlace(forward.scale(this.shipSpeed * dt));
@@ -919,6 +989,16 @@ export default class SpaceExplorer {
       this.camera.setTarget(this.ship.position.add(forward.scale(10)));
       
       this.info.distanceTraveled += this.shipSpeed * dt;
+    }
+    
+    // Update shield visual
+    if (this.shieldMesh && this.shieldMesh.material) {
+      const mat = this.shieldMesh.material as BABYLON.StandardMaterial;
+      if (this.shieldActive) {
+        mat.alpha = Math.min(mat.alpha + dt * 2, 0.6);
+      } else {
+        mat.alpha = Math.max(mat.alpha - dt * 2, 0);
+      }
     }
     
     // Rotate asteroids and animate objects
@@ -1000,6 +1080,52 @@ export default class SpaceExplorer {
     }
     
     this.info.speed = Math.round(this.shipSpeed);
+  }
+  
+  // Ship Upgrade Methods
+  private toggleShield(): void {
+    if (this.shieldStrength < 10) {
+      console.log('⚠️ Insufficient shield power!');
+      return;
+    }
+    
+    this.shieldActive = !this.shieldActive;
+    if (this.shieldActive) {
+      console.log('🛡️ Shield ACTIVE');
+    } else {
+      console.log('🛡️ Shield deactivated');
+    }
+  }
+  
+  private activateBoost(): void {
+    if (!this.boostAvailable) return;
+    
+    this.boostAvailable = false;
+    this.boostDuration = 3; // 3 seconds of boost
+    this.boostCooldown = 10; // 10 second cooldown
+    this.maxSpeed = (50 + (this.speedUpgradeLevel * 10)) * 2; // Double max speed
+    console.log('🚀 BOOST ACTIVATED! Max speed doubled!');
+  }
+  
+  public upgradeSpeed(): void {
+    if (this.speedUpgradeLevel >= 5) {
+      console.log('⚠️ Maximum speed upgrade reached!');
+      return;
+    }
+    this.speedUpgradeLevel++;
+    this.maxSpeed = 50 + (this.speedUpgradeLevel * 10);
+    console.log(`⚡ Speed upgraded to level ${this.speedUpgradeLevel}! Max speed: ${this.maxSpeed}`);
+  }
+  
+  public changeShipColor(color: BABYLON.Color3): void {
+    this.shipColor = color;
+    // Update ship material
+    const shipMat = this.ship.material as BABYLON.StandardMaterial;
+    if (shipMat) {
+      shipMat.diffuseColor = color;
+      shipMat.emissiveColor = color.scale(0.2);
+    }
+    console.log(`🎨 Ship color changed to RGB(${color.r.toFixed(2)}, ${color.g.toFixed(2)}, ${color.b.toFixed(2)})`);
   }
 
   // Menu System Methods
